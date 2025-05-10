@@ -24,4 +24,9 @@ class UsuarioLogin { //Es solo pa el login y registro
     correo = "";
     contrasena = "";
   }
+
+  @override
+String toString() {
+  return 'UsuarioLogin(nombre: $nombre, correo: $correo, contrasena: $contrasena)';
+}
 }

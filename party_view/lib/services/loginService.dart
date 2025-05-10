@@ -38,6 +38,7 @@ class Loginservice {
   /// - `2` si ocurrió un error desconocido.
   /// - `3` si el correo electrónico ya está en uso.
   Future<int> registro(UsuarioLogin _usuarioLogin) async {
+    //print(_usuarioLogin.toString());
     final response = await http.post(
       urlRegister,
       headers: {"Content-Type": "application/json"},
@@ -48,12 +49,14 @@ class Loginservice {
       }),
     );
 
+    
     if (response.statusCode == 200) {
       // Registro exitoso, actualiza el displayName
       final response2 = await http.post(
         urlUpdate,
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
+          "idToken": jsonDecode(response.body)["idToken"],
           "displayName": _usuarioLogin.nombre,
           "returnSecureToken": true,
         }),
@@ -64,34 +67,38 @@ class Loginservice {
       String _uid = responseData["localId"];
       String _token = responseData["idToken"];
 
+      
       if (response2.statusCode == 200) {
-        await personaProvider.crearPersona(_usuarioLogin.nombre!,_uid, _token); ///Se crea la persona y se almacena de manera local
+        await personaProvider.crearPersona(_usuarioLogin.nombre ?? "usuario",_uid, _token); ///Se crea la persona y se almacena de manera local
         _usuarioLogin.borrarDatos(); // Borra los datos del usuario
+
         return 0; // Registro exitoso.
       } else {
         return 2; // Error desconocido.
       }
     } else if (response.statusCode == 400) {
+      
       return 3; // El correo electrónico ya está en uso.
     } else {
+      print("error desconocido en el registro");
       return 2; // Error desconocido.
     }
   }
 
   /// Inicia sesión con un usuario existente en Firebase Authentication.
   ///
-  /// [usuario] El objeto [Usuario] que contiene el email y contraseña.
+  /// [_usuarioLogin] El objeto [Usuario] que contiene el email y contraseña.
   /// Retorna:
   /// - `0` si el inicio de sesión fue exitoso.
   /// - `1` si hay un error en la contraseña o correo electrónico.
   /// - `2` si ocurrió un error desconocido.
-  Future<int> login(UsuarioLogin usuario) async {
+  Future<int> login(UsuarioLogin _usuarioLogin) async {
     final response = await http.post(
       urlLogin,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
-        "email": usuario.correo,
-        "password": usuario.contrasena,
+        "email": _usuarioLogin.correo,
+        "password": _usuarioLogin.contrasena,
         "returnSecureToken": true,
       }),
     );
@@ -109,9 +116,11 @@ class Loginservice {
       final responseData = jsonDecode(response.body);
       String _uid = responseData["localId"];
       String _token = responseData["idToken"];
+      String _nombre = responseData["displayName"];
 
       // Usa el provider inyectado.
-      await personaProvider.crearPersona(usuario.nombre!, _uid, _token); ///Se crea la persona y se almacena de manera local
+      await personaProvider.crearPersona(_nombre, _uid, _token); ///Se crea la persona y se almacena de manera local
+      _usuarioLogin.borrarDatos(); // Borra los datos del usuario
       return 0; // Inicio de sesión exitoso.
     } else {
       print("Error desconocido");

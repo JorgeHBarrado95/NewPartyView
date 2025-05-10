@@ -7,8 +7,13 @@ class RegistroScreen extends StatelessWidget {
   final TextEditingController campoContrasena = TextEditingController();
   final TextEditingController campoConfirmarContrasena = TextEditingController();
 
+  
   @override
   Widget build(BuildContext context) {
+    campoNombre.text = "Sergio";
+    campoEmail.text = "1@gmail.com";
+    campoContrasena.text = "123456";
+    campoConfirmarContrasena.text = "123456";
     Registrovalidacion _registroValidacion = Registrovalidacion();
     return Scaffold(
       backgroundColor: Colors.white,
