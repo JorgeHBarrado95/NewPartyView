@@ -61,7 +61,7 @@ class LoginScreen extends StatelessWidget {
                 onPressed: () { //INICIAR SESION
                   String _correo = campoEmail.text;
                   String _contrasena = campoContrasena.text;
-                  _loginValidacion.iniciarSeseion(_correo, _contrasena);
+                  _loginValidacion.iniciarSeseion(context,_correo, _contrasena);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.deepPurple,
@@ -78,7 +78,6 @@ class LoginScreen extends StatelessWidget {
               SizedBox(height: 15),
               TextButton(
                 onPressed: () {
-
                   Navigator.pushNamed(context, "/registro");
                 },
                 child: Text(

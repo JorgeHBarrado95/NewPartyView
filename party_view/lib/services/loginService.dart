@@ -66,6 +66,7 @@ class Loginservice {
 
       if (response2.statusCode == 200) {
         await personaProvider.crearPersona(_usuarioLogin.nombre!,_uid, _token); ///Se crea la persona y se almacena de manera local
+        _usuarioLogin.borrarDatos(); // Borra los datos del usuario
         return 0; // Registro exitoso.
       } else {
         return 2; // Error desconocido.
@@ -84,37 +85,37 @@ class Loginservice {
   /// - `0` si el inicio de sesión fue exitoso.
   /// - `1` si hay un error en la contraseña o correo electrónico.
   /// - `2` si ocurrió un error desconocido.
-  // Future<int> login(Usuario usuario) async {
-  //   final response = await http.post(
-  //     urlLogin,
-  //     headers: {"Content-Type": "application/json"},
-  //     body: jsonEncode({
-  //       "email": usuario.correo,
-  //       "password": usuario.contrasena,
-  //       "returnSecureToken": true,
-  //     }),
-  //   );
+  Future<int> login(UsuarioLogin usuario) async {
+    final response = await http.post(
+      urlLogin,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "email": usuario.correo,
+        "password": usuario.contrasena,
+        "returnSecureToken": true,
+      }),
+    );
 
-  //   //print("Response status: ${response.statusCode}");
-  //   //print("Response body: ${response.body}");
+    //print("Response status: ${response.statusCode}");
+    //print("Response body: ${response.body}");
 
-  //   if (response.statusCode == 400) {
-  //     print("Error: Contraseña o correo incorrecto");
-  //     return 1; // Error en la contraseña o correo electrónico.
-  //   } else if (response.statusCode == 200) {
-  //     print("Inicio de sesión exitoso");
+    if (response.statusCode == 400) {
+      print("Error: Contraseña o correo incorrecto");
+      return 1; // Error en la contraseña o correo electrónico.
+    } else if (response.statusCode == 200) {
+      print("Inicio de sesión exitoso");
 
-  //     // Actualiza el displayName del usuario con el valor recibido del servidor.
-  //     final responseData = jsonDecode(response.body);
-  //     usuario.nombre = responseData["displayName"];
+      // Actualiza el displayName del usuario con el valor recibido del servidor.
+      final responseData = jsonDecode(response.body);
+      String _uid = responseData["localId"];
+      String _token = responseData["idToken"];
 
-  //     // Usa el provider inyectado.
-  //     await personaProvider.crearPersona(usuario.nombre!);
-  //     //print(personaProvider.getPersona.toString());
-  //     return 0; // Inicio de sesión exitoso.
-  //   } else {
-  //     print("Error desconocido");
-  //     return 2; // Error desconocido.
-  //   }
-  // }
+      // Usa el provider inyectado.
+      await personaProvider.crearPersona(usuario.nombre!, _uid, _token); ///Se crea la persona y se almacena de manera local
+      return 0; // Inicio de sesión exitoso.
+    } else {
+      print("Error desconocido");
+      return 2; // Error desconocido.
+    }
+  }
 }
