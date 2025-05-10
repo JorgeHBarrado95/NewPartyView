@@ -65,7 +65,7 @@ class Loginservice {
       String _token = responseData["idToken"];
 
       if (response2.statusCode == 200) {
-        await personaProvider.crearPersona(_usuarioLogin.nombre!,_uid, _token);
+        await personaProvider.crearPersona(_usuarioLogin.nombre!,_uid, _token); ///Se crea la persona y se almacena de manera local
         return 0; // Registro exitoso.
       } else {
         return 2; // Error desconocido.

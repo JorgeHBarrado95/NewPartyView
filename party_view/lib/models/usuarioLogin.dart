@@ -18,4 +18,10 @@ class UsuarioLogin { //Es solo pa el login y registro
       nombre: json["displayName"],
     );
   }
+
+  void borrarDatos() {
+    nombre = null;
+    correo = "";
+    contrasena = "";
+  }
 }
