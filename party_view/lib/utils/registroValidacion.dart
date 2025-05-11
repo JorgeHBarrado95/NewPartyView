@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:party_view/models/usuarioLogin.dart';
 import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/loginService.dart';
-import 'package:party_view/widget/CustomSnackBar.dart';
+import 'package:party_view/widget/customSnackBar.dart';
 import 'package:provider/provider.dart';
 
 class Registrovalidacion {

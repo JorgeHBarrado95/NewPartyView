@@ -4,9 +4,11 @@ import 'package:party_view/utils/loginValidacion.dart';
 class LoginScreen extends StatelessWidget {
   final TextEditingController campoEmail = TextEditingController();
   final TextEditingController campoContrasena = TextEditingController();
-
+  
   @override
   Widget build(BuildContext context) {
+    campoEmail.text = "12@gmail.com";
+    campoContrasena.text = "123456";
     final LoginValidacion _loginValidacion = LoginValidacion();
     return Scaffold(
       backgroundColor: Colors.white,

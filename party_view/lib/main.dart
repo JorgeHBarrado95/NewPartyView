@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:party_view/provider/personaProvider.dart';
-import 'package:party_view/screen/Principal.dart';
+import 'package:party_view/screen/principal.dart';
 import 'package:party_view/screen/Registro/login.dart';
 import 'package:party_view/screen/Registro/registro.dart';
 
@@ -28,7 +28,7 @@ class MyApp extends StatelessWidget {
       routes: {
         "/login": (context) => LoginScreen(),
         "/registro": (context) => RegistroScreen(),
-         "/principal": (context) => PrincipalScreen(),
+         "/principal": (context) => Principal(),
         // "/salaEspera": (context) => SalaEspera(),
         // "/reproduccion": (context) => ReproduccionAnfitrion(),
       },
