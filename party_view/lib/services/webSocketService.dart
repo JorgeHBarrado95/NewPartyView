@@ -6,13 +6,12 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketServicio {
   WebSocketChannel? _channel;
-  String? _token;
+
 
   //String _url = "ws://servidorsocket-r8mu.onrender.com"; // Cambia esto a tu URL de WebSocket
   String _url = "ws://localhost:8081"; // Cambia 'https' por 'wss'
 
-  void conexion(String token, BuildContext context) async {
-    _token = token;
+  void conexion(BuildContext context) async {
     _channel = WebSocketChannel.connect(Uri.parse(_url));
     _escucha(context);
   }
@@ -41,6 +40,17 @@ class WebSocketServicio {
             break;
           case 'signal':
             print("📡 Signal recibido: $contenido");
+            break;
+          case "sala-creada":
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Sala creada",
+                  "${data["message"]}",
+                ),
+              );
             break;
           default:
             print("🔔 Mensaje recibido: $data");
@@ -100,12 +110,10 @@ class WebSocketServicio {
   }
 
   void _mandarMensaje(String type, Map<String, dynamic> payload) {
-    if (_channel == null || _token == null) {
+    if (_channel == null) {
       print("⚠️ No conectado o sin token");
       return;
     }
-
-    payload['token'] = _token;
 
     final message = jsonEncode({
       'type': type,

@@ -33,7 +33,7 @@ class ListViewSala extends StatelessWidget {
                     "Capacidad max: ${sala.capacidad}, Estado: ${sala.estado}",
                   ),
                   onTap: () {
-                    conectarSala(context, sala);
+                    unirseSala(context, sala);
                   },
                 ),
                 Text("Anfitrión: ${sala.anfitrion.nombre}"),
@@ -45,12 +45,12 @@ class ListViewSala extends StatelessWidget {
     );
   }
 
-  void conectarSala(BuildContext context, Sala sala) async{
+  void unirseSala(BuildContext context, Sala sala) async{
     final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
     final _personaProvider = Provider.of<PersonaProvider>(context, listen: false);
     WebSocketServicio _webSocketServicio = WebSocketServicio();
 
-    _webSocketServicio.conexion(_personaProvider.getPersona!.token!, context);
+    _webSocketServicio.conexion(context);
     _webSocketServicio.unirseSala(
       id: sala.id,
       persona: _personaProvider.getPersona!.toJson(),

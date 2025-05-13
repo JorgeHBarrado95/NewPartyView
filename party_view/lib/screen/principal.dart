@@ -1,4 +1,3 @@
-
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
 import "package:party_view/provider/SalaProvider.dart";
@@ -124,7 +123,7 @@ class _PrincipalState extends State<Principal> {
 
                 //CREAR SALAS
                 FloatingActionButton(
-                  onPressed: () {
+                  onPressed: () async {
                     // Navigator.pushNamed(
                     //   context,
                     //   "/salaEspera",
@@ -133,30 +132,31 @@ class _PrincipalState extends State<Principal> {
                     //Sala nueva
 
                     final personaProvider = Provider.of<PersonaProvider>(
-                    context,
-                    listen: false,
+                      context,
+                      listen: false,
                     );
 
-                    final salaProrvide = Provider.of<SalaProvider>(
-                    context,
-                    listen: false,
+                    final salaProvider = Provider.of<SalaProvider>(
+                      context,
+                      listen: false,
                     );
-                                        personaProvider.esAnfitrion = true;
-                    salaProrvide.crearSala(personaProvider.getPersona!);
-                    
-                    final _socket= WebSocketServicio();
-                    
-                    _socket.conexion(personaProvider.getPersona!.token!,context);
 
+                    personaProvider.esAnfitrion = true;
 
-                      // Crear sala
-                    _socket.crearSala(salaProrvide.sala!);
+                    // Crear sala en el proveedor
+                    await salaProvider.crearSala(personaProvider.getPersona!);
 
+                    // Sincronizar sala con Firebase
+                    final gestorSalasService = GestorSalasService();
+                    await gestorSalasService.actualizarSala(salaProvider.sala!);
 
-
+                    // Conectar al WebSocket y crear la sala
+                    final _socket = WebSocketServicio();
+                    _socket.conexion(context);
+                    _socket.crearSala(salaProvider.sala!);
                   },
-                  backgroundColor: Colors.white, // Botón blanco
-                  child: Icon(Icons.add, color: Colors.purpleAccent), // Ícono púrpura claro
+                  backgroundColor: Colors.white,
+                  child: Icon(Icons.add, color: Colors.purpleAccent),
                   heroTag: "add",
                 ),
               ],

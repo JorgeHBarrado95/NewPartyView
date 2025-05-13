@@ -33,7 +33,7 @@ class PersonaProvider with ChangeNotifier {
 
   Future<void> crearPersona(String nombre, String uid, String token) async {
     // Cambia a Future para manejar la asincronía.
-    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid,token: token); // Crea y asigna la persona.
+    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid); // Crea y asigna la persona.
     print("persona creada");
   }
 

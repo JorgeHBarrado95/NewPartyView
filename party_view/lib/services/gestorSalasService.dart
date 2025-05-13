@@ -55,6 +55,10 @@ class GestorSalasService {
       throw Exception("Fallo al obtener salas: ${response.body}");
     }
 
+    if (response.body == "null" || response.body.isEmpty) {
+      return []; // Devuelve una lista vacía si no hay salas.
+    }
+
     final Map<String, dynamic> data = jsonDecode(response.body);
     final List<Sala> salas = [];
 
