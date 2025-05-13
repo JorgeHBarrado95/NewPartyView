@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/material.dart';
 import 'package:party_view/models/sala.dart';
+import 'package:party_view/widget/customSnackBar.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketServicio {
@@ -7,30 +9,38 @@ class WebSocketServicio {
   String? _token;
 
   //String _url = "ws://servidorsocket-r8mu.onrender.com"; // Cambia esto a tu URL de WebSocket
-  String _url = "ws://localhost:8080"; // Cambia 'https' por 'wss'
+  String _url = "ws://localhost:8081"; // Cambia 'https' por 'wss'
 
-  void conexion(String token ) async {
+  void conexion(String token, BuildContext context) async {
     _token = token;
     _channel = WebSocketChannel.connect(Uri.parse(_url));
-    _escucha();
+    _escucha(context);
   }
 
-  void _escucha() {
+  void _escucha(BuildContext context) {
     _channel?.stream.listen(
       (message) {
         final data = jsonDecode(message);
         final type = data['type'];
-        final payload = data['payload'];
+        final contenido = data["contenido"];
 
         switch (type) {
-          case 'error':
-            print("⚠️ Error: ${data['message']}");
+          case "error":
+            print("⚠️ Error: ");
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.error(
+                  "Error",
+                  "${data["message"]}",
+                ),
+              );
             break;
           case 'invitado-join':
-            print("👤 Nuevo invitado: ${payload['nombre']}");
+            print("👤 Nuevo invitado: ${contenido['nombre']}");
             break;
           case 'signal':
-            print("📡 Signal recibido: $payload");
+            print("📡 Signal recibido: $contenido");
             break;
           default:
             print("🔔 Mensaje recibido: $data");
@@ -60,8 +70,8 @@ class WebSocketServicio {
     required Map<String, dynamic> persona,
   }) {
     _mandarMensaje("unirse-sala", {
-      'id': id,
-      'persona': persona,
+      "id-sala": id,
+      "persona": persona,
     });
   }
 

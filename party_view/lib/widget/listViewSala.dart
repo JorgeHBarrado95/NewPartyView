@@ -1,5 +1,10 @@
+
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
+import "package:party_view/provider/SalaProvider.dart";
+import "package:party_view/provider/personaProvider.dart";
+import "package:party_view/services/webSocketService.dart";
+import "package:provider/provider.dart";
 
 
 class ListViewSala extends StatelessWidget {
@@ -28,7 +33,7 @@ class ListViewSala extends StatelessWidget {
                     "Capacidad max: ${sala.capacidad}, Estado: ${sala.estado}",
                   ),
                   onTap: () {
-                    //conectarSala(context, sala);
+                    conectarSala(context, sala);
                   },
                 ),
                 Text("Anfitrión: ${sala.anfitrion.nombre}"),
@@ -39,6 +44,21 @@ class ListViewSala extends StatelessWidget {
       },
     );
   }
+
+  void conectarSala(BuildContext context, Sala sala) async{
+    final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    final _personaProvider = Provider.of<PersonaProvider>(context, listen: false);
+    WebSocketServicio _webSocketServicio = WebSocketServicio();
+
+    _webSocketServicio.conexion(_personaProvider.getPersona!.token!, context);
+    _webSocketServicio.unirseSala(
+      id: sala.id,
+      persona: _personaProvider.getPersona!.toJson(),
+    );
+  }
+
+
+
 
   // void conectarSala(BuildContext context, Sala sala) async {
   //   final _salaProvider = Provider.of<SalaProvider>(context, listen: false);

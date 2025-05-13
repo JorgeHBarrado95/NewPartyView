@@ -1,4 +1,3 @@
-import "dart:io";
 
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
@@ -147,7 +146,7 @@ class _PrincipalState extends State<Principal> {
                     
                     final _socket= WebSocketServicio();
                     
-                    _socket.conexion(personaProvider.getPersona!.token!);
+                    _socket.conexion(personaProvider.getPersona!.token!,context);
 
 
                       // Crear sala
