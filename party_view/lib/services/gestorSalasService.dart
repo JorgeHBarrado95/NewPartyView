@@ -13,18 +13,18 @@ class GestorSalasService {
   ///
   /// [sala] La sala que se desea añadir.
   /// Lanza una excepción si ocurre un error durante la operación.
-  Future<void> addSala(Sala sala) async {
-    final url = Uri.parse("${this.url}/${sala.id}.json");
-    final response = await http.put(
-      url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(sala.toJson()),
-    );
+  // Future<void> addSala(Sala sala) async {
+  //   final url = Uri.parse("${this.url}/${sala.id}.json");
+  //   final response = await http.put(
+  //     url,
+  //     headers: {"Content-Type": "application/json"},
+  //     body: jsonEncode(sala.toJson()),
+  //   );
 
-    if (response.statusCode != 200) {
-      throw Exception("Failed to add sala: ${response.body}");
-    }
-  }
+  //   if (response.statusCode != 200) {
+  //     throw Exception("Failed to add sala: ${response.body}");
+  //   }
+  // }
 
   /// Comprueba si una sala con el ID especificado existe en la base de datos.
   ///
@@ -116,9 +116,12 @@ class GestorSalasService {
     return invitados;
   }
 
-
-
-
-
-
 }
+
+
+
+
+
+
+
+

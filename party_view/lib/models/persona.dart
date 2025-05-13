@@ -25,7 +25,6 @@ class Persona {
       "nombre": nombre,
       "esAnfitrion": esAnfitrion,
       "uid": uid,
-      "token": token,
     };
   }
 }

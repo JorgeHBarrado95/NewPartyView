@@ -1,7 +1,13 @@
+import "dart:io";
+
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
+import "package:party_view/provider/SalaProvider.dart";
+import "package:party_view/provider/personaProvider.dart";
 import "package:party_view/services/gestorSalasService.dart";
+import "package:party_view/services/webSocketService.dart";
 import "package:party_view/widget/listViewSala.dart";
+import "package:provider/provider.dart";
 
 class Principal extends StatefulWidget {
   Principal({super.key});
@@ -116,13 +122,39 @@ class _PrincipalState extends State<Principal> {
                   heroTag: "refresh",
                 ),
                 SizedBox(height: 16),
+
+                //CREAR SALAS
                 FloatingActionButton(
                   onPressed: () {
-                    Navigator.pushNamed(
-                      context,
-                      "/salaEspera",
-                      arguments: {"sala": null, "esAnfitrion": true},
+                    // Navigator.pushNamed(
+                    //   context,
+                    //   "/salaEspera",
+                    //   arguments: {"sala": null, "esAnfitrion": true},
+                    // );
+                    //Sala nueva
+
+                    final personaProvider = Provider.of<PersonaProvider>(
+                    context,
+                    listen: false,
                     );
+
+                    final salaProrvide = Provider.of<SalaProvider>(
+                    context,
+                    listen: false,
+                    );
+                                        personaProvider.esAnfitrion = true;
+                    salaProrvide.crearSala(personaProvider.getPersona!);
+                    
+                    final _socket= WebSocketServicio();
+                    
+                    _socket.conexion(personaProvider.getPersona!.token!);
+
+
+                      // Crear sala
+                    _socket.crearSala(salaProrvide.sala!);
+
+
+
                   },
                   backgroundColor: Colors.white, // Botón blanco
                   child: Icon(Icons.add, color: Colors.purpleAccent), // Ícono púrpura claro

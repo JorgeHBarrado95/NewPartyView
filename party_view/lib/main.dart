@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:party_view/provider/SalaProvider.dart';
 import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/screen/principal.dart';
 import 'package:party_view/screen/Registro/login.dart';
@@ -11,7 +12,7 @@ void main() {
   runApp(
     MultiProvider(
       providers: [
-        // ChangeNotifierProvider(create: (context) => SalaProvider()),
+        ChangeNotifierProvider(create: (context) => SalaProvider()),
         ChangeNotifierProvider(create: (_) => PersonaProvider()),
       ],
       child: MyApp(),

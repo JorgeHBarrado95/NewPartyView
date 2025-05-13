@@ -26,6 +26,11 @@ class PersonaProvider with ChangeNotifier {
     notifyListeners(); // Notifica a los oyentes sobre el cambio.
   }
 
+  set esAnfitrion(bool esAnfitrion) {
+    _persona!.esAnfitrion = esAnfitrion; // Cambia el estado de 'esAnfitrion'.
+    notifyListeners(); // Notifica a los oyentes sobre el cambio.
+  }
+
   Future<void> crearPersona(String nombre, String uid, String token) async {
     // Cambia a Future para manejar la asincronía.
     _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid,token: token); // Crea y asigna la persona.
