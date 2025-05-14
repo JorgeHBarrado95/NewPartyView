@@ -4,6 +4,7 @@ import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/screen/principal.dart';
 import 'package:party_view/screen/Registro/login.dart';
 import 'package:party_view/screen/Registro/registro.dart';
+import 'package:party_view/screen/salaEspera.dart';
 
 
 import 'package:provider/provider.dart';
@@ -30,7 +31,7 @@ class MyApp extends StatelessWidget {
         "/login": (context) => LoginScreen(),
         "/registro": (context) => RegistroScreen(),
          "/principal": (context) => Principal(),
-        // "/salaEspera": (context) => SalaEspera(),
+         "/salaEspera": (context) => SalaEspera(),
         // "/reproduccion": (context) => ReproduccionAnfitrion(),
       },
     );

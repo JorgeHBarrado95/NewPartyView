@@ -42,7 +42,6 @@ class WebSocketServicio {
             print("📡 Signal recibido: $contenido");
             break;
           case "sala-creada":
-
             ScaffoldMessenger.of(context)
               ..hideCurrentSnackBar()
               ..showSnackBar(
@@ -51,7 +50,14 @@ class WebSocketServicio {
                   "${data["message"]}",
                 ),
               );
+
+            Navigator.pushNamed(
+              context,
+              "/salaEspera",
+            );
             break;
+          case "conexion":
+            print("🔔 $data");
           default:
             print("🔔 Mensaje recibido: $data");
         }

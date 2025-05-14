@@ -124,11 +124,6 @@ class _PrincipalState extends State<Principal> {
                 //CREAR SALAS
                 FloatingActionButton(
                   onPressed: () async {
-                    // Navigator.pushNamed(
-                    //   context,
-                    //   "/salaEspera",
-                    //   arguments: {"sala": null, "esAnfitrion": true},
-                    // );
                     //Sala nueva
 
                     final personaProvider = Provider.of<PersonaProvider>(
