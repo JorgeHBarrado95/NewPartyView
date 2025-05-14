@@ -1,6 +1,4 @@
-import 'package:party_view/models/sala.dart';
 import 'package:party_view/provider/personaProvider.dart';
-import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/ListViewInvitados.dart';
 import 'package:provider/provider.dart';
 
@@ -48,6 +46,7 @@ class _SalaEsperaState extends State<SalaEspera> {
         mainAxisSize: MainAxisSize.min,
         children: [
           FloatingActionButton(
+            heroTag: "btn1",
             onPressed: () {
               Navigator.pop(context);
             },
@@ -56,6 +55,7 @@ class _SalaEsperaState extends State<SalaEspera> {
           SizedBox(height: 10),
           if (personaProvider.getPersona!.esAnfitrion)
             FloatingActionButton(
+              heroTag: "btn2",
               onPressed: () {
                 Navigator.pushNamed(
                   context,
@@ -141,7 +141,7 @@ class _MenuArribaState extends State<MenuArriba> {
 
   @override
   Widget build(BuildContext context) {
-    final _salaProvider = Provider.of<SalaProvider>(context);
+    final _salaProvider = Provider.of<SalaProvider>(context, listen: true);
     final _sala = _salaProvider.sala;
 
     return Container(

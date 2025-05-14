@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:party_view/models/sala.dart';
+import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/customSnackBar.dart';
+import 'package:provider/provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketServicio {
@@ -18,7 +21,7 @@ class WebSocketServicio {
 
   void _escucha(BuildContext context) {
     _channel?.stream.listen(
-      (message) {
+      (message) async { // <-- Hacemos la función async
         final data = jsonDecode(message);
         final type = data['type'];
         final contenido = data["contenido"];
@@ -35,8 +38,46 @@ class WebSocketServicio {
                 ),
               );
             break;
-          case 'invitado-join':
+          case "invitado-unido": //Notificacion para el anfitrion
             print("👤 Nuevo invitado: ${contenido['nombre']}");
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "",
+                  "${data["message"]}",
+                ),
+              );
+
+            break;
+
+          case "unido-correctamente": //Notificaacion para el invitado
+            print("👤 Unido correctamente a la sala: #${data['salaId']}");
+
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Uniendote a la sala...",
+                  "${data["message"]}",
+                ),
+              );
+            
+            final _salaProvider = Provider.of<SalaProvider>(
+              context,
+              listen: false,
+            );
+
+            GestorSalasService _gestorSalasService = GestorSalasService();
+            final sala = await _gestorSalasService.obtenerSala(data['salaId']);
+            _salaProvider.setSala(sala);
+
+            Navigator.pushNamed(
+              context,
+              "/salaEspera",
+            );
+
             break;
           case 'signal':
             print("📡 Signal recibido: $contenido");

@@ -120,6 +120,14 @@ class GestorSalasService {
     return invitados;
   }
 
+  Future<dynamic> obtenerSala(String id) async {
+    final url2 = Uri.parse("${this.url}/${id}.json");
+    final response = await http.get(url2);
+
+    final Map<String, dynamic> data = jsonDecode(response.body);
+    return Sala.fromJson(id, data); 
+  }
+
 }
 
 
