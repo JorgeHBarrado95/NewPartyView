@@ -8,6 +8,10 @@ import 'package:provider/provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class WebSocketServicio {
+  static final WebSocketServicio _instance = WebSocketServicio._internal();
+  factory WebSocketServicio() => _instance;
+  WebSocketServicio._internal();
+
   WebSocketChannel? _channel;
 
 
@@ -188,5 +192,26 @@ class WebSocketServicio {
 
   void disconnect() {
     _channel?.sink.close();
+  }
+
+  void incrementarCapacidad(String salaId) {
+    print("object");
+  
+    _mandarMensaje("subir-capacidad", {
+      "id-sala": salaId,
+    });
+  }
+
+  void disminuirCapacidad(String salaId) {
+    _mandarMensaje("bajar-capacidad", {
+      "id-sala": salaId,
+    });
+  }
+  
+  void cambiarEstado(String salaId,String estado) {
+    _mandarMensaje("cambiar-estado", {
+      "id-sala": salaId,
+      "estado": estado,
+    });
   }
 }

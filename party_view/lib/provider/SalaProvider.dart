@@ -5,12 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:party_view/models/persona.dart';
 import 'package:party_view/models/sala.dart';
 import 'package:party_view/services/gestorSalasService.dart';
+import 'package:party_view/services/webSocketService.dart';
 
 /// Proveedor que gestiona el estado de una sala y su sincronización con la base de datos.
 class SalaProvider with ChangeNotifier {
   final GestorSalasService _gestorSalasService = GestorSalasService();
   Sala? _sala; // Sala actual gestionada por el proveedor.
-  Timer? _timer; // Temporizador para actualizar invitados periódicamente.
 
   /// Obtiene la sala actual.
   Sala? get sala => _sala;
@@ -33,7 +33,8 @@ class SalaProvider with ChangeNotifier {
   void incrementarCapacidad() {
     _sala!.capacidad++;
     notifyListeners();
-    _sincronizarBD();
+    WebSocketServicio _webSocketServicio = WebSocketServicio();
+    _webSocketServicio.incrementarCapacidad(_sala!.id);
   }
 
   /// Disminuye la capacidad de la sala en 1 si es mayor a 2 y sincroniza con la base de datos.
@@ -41,7 +42,8 @@ class SalaProvider with ChangeNotifier {
     if (_sala!.capacidad > 2) {
       _sala!.capacidad--;
       notifyListeners();
-      _sincronizarBD();
+      WebSocketServicio _webSocketServicio = WebSocketServicio();
+      _webSocketServicio.disminuirCapacidad(_sala!.id);
     }
   }
 
@@ -51,7 +53,8 @@ class SalaProvider with ChangeNotifier {
   void estado(String estado) {
     _sala!.estado = estado;
     notifyListeners();
-    _sincronizarBD();
+    WebSocketServicio _webSocketServicio = WebSocketServicio();
+    _webSocketServicio.cambiarEstado(_sala!.id, estado);
   }
 
   /// Crea una nueva sala con un ID aleatorio y configura sus valores iniciales.
@@ -90,10 +93,6 @@ class SalaProvider with ChangeNotifier {
     return _randIdString;
   }
 
-  /// Sincroniza la sala actual con la base de datos.
-  Future<void> _sincronizarBD() async {
-    await _gestorSalasService.actualizarSala(_sala!);
-  }
 
   /// Obtiene la lista de invitados de la sala desde la base de datos.
   // Future<void> _obtenerInvitados() async {
@@ -114,7 +113,6 @@ class SalaProvider with ChangeNotifier {
   Future<void> bloquearPersona(Persona persona) async {
     _sala!.bloqueados.add(persona);
     eliminarInvitado(persona);
-    await _sincronizarBD();
   }
 
   //Actualizamos invitados cuando se notifica desde el socket
