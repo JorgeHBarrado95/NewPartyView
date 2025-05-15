@@ -99,6 +99,15 @@ class WebSocketServicio {
           //   );
           //   await _salaProvider.actualizarSala();
           //   break;
+
+          case "actualizacion-sala":
+            print("Se ha actualizado la sala");
+            final _salaProvider = Provider.of<SalaProvider>(
+              context,
+              listen: false,
+            );
+            await _salaProvider.actualizarSala();
+            break;
           case 'signal':
             print("📡 Signal recibido: $contenido");
             break;

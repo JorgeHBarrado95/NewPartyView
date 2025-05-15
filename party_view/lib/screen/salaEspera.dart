@@ -124,13 +124,13 @@ class MenuArriba extends StatefulWidget {
 }
 
 class _MenuArribaState extends State<MenuArriba> {
-  String _selectedEstado = "Abierto";
   final List<String> _estados = ["Abierto", "Cerrado"];
 
   @override
   Widget build(BuildContext context) {
     final _salaProvider = Provider.of<SalaProvider>(context, listen: true);
-
+    final sala = _salaProvider.sala;
+    final String? estadoActual = sala?.estado;
 
     return Container(
       child: Column(
@@ -187,7 +187,7 @@ class _MenuArribaState extends State<MenuArriba> {
               Text("Estado de la sala:", style: TextStyle(fontSize: 16)),
               SizedBox(width: 15),
               DropdownButton<String>(
-                value: _selectedEstado,
+                value: estadoActual ?? _estados.first,
                 items: _estados.map((String estado) {
                   return DropdownMenuItem<String>(
                     value: estado,
@@ -196,10 +196,9 @@ class _MenuArribaState extends State<MenuArriba> {
                 }).toList(),
                 onChanged: widget.esAnfitrion
                     ? (String? newValue) {
-                        setState(() {
-                          _selectedEstado = newValue!;
-                          _salaProvider.estado(_selectedEstado);
-                        });
+                        if (newValue != null) {
+                          _salaProvider.estado(newValue);
+                        }
                       }
                     : null,
               ),
