@@ -30,8 +30,7 @@ class ListViewInvitados extends StatelessWidget {
               children: [
                 ListTile(
                   leading: CircleAvatar(child: Text(invitado.nombre[0])),
-                  title: Text("Invitado: #${invitado}"),
-                  subtitle: Text("Nombre: ${invitado.nombre}"),
+                  title: Text("Nombre: ${invitado.nombre}"),
                   trailing:
                       esAnfitrion
                           ? Row(

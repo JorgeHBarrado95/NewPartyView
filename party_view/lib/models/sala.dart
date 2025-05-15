@@ -32,20 +32,38 @@ class Sala {
   }
 
   factory Sala.fromJson(String id, Map<String, dynamic> json) {
+    List<Persona> transformarPersonas(dynamic data) {
+      if (data == null) return [];
+      if (data is List) {
+        return data
+            .where((item) => item != null)
+            .map((item) => Persona.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+      if (data is Map) {
+        return data.values
+            .where((item) => item != null)
+            .map((item) => Persona.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+    return [];
+  }
     return Sala(
       id: id,
       capacidad: json["capacidad"] as num,
       video: json["video"] is bool ? json["video"] : json["video"] == "true",
       estado: json["estado"] as String,
       anfitrion: Persona.fromJson(json["anfitrion"] as Map<String, dynamic>),
-      invitados: (json["invitados"] as Map<String, dynamic>? ?? {})
-          .values
-          .map((invitado) => Persona.fromJson(invitado as Map<String, dynamic>))
-          .toList(),
-      bloqueados: (json["bloqueados"] as Map<String, dynamic>? ?? {})
-          .values
-          .map((bloqueado) => Persona.fromJson(bloqueado as Map<String, dynamic>))
-          .toList(),
+      // invitados: (json["invitados"] as Map<String, dynamic>? ?? {})
+      //     .values
+      //     .map((invitado) => Persona.fromJson(invitado as Map<String, dynamic>))
+      //     .toList(),
+      // bloqueados: (json["bloqueados"] as Map<String, dynamic>? ?? {})
+      //     .values
+      //     .map((bloqueado) => Persona.fromJson(bloqueado as Map<String, dynamic>))
+      //     .toList(),
+       invitados: transformarPersonas(json["invitados"]),
+    bloqueados: transformarPersonas(json["bloqueados"]),
     );
   }
 

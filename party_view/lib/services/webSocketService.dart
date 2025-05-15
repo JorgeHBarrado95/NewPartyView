@@ -45,10 +45,17 @@ class WebSocketServicio {
               ..hideCurrentSnackBar()
               ..showSnackBar(
                 CustomSnackbar.info(
-                  "",
-                  "${data["message"]}",
+                  "Nuevo invitado",
+                  "${contenido['nombre']} esta ahora con nosotros!!",
                 ),
               );
+            //Actualizamos la lista de invitados
+            final _salaProvider = Provider.of<SalaProvider>(
+              context,
+              listen: false,
+            );
+
+            _salaProvider.actualizarInvitados();
 
             break;
 
@@ -79,6 +86,15 @@ class WebSocketServicio {
             );
 
             break;
+          //Cada vez q se une un invitado, se actualiza la sala
+          // case "actualizacion-sala":
+          //   print("Se ha actualizado la sala");
+          //   final _salaProvider = Provider.of<SalaProvider>(
+          //     context,
+          //     listen: false,
+          //   );
+          //   await _salaProvider.actualizarSala();
+          //   break;
           case 'signal':
             print("📡 Signal recibido: $contenido");
             break;

@@ -96,24 +96,12 @@ class SalaProvider with ChangeNotifier {
   }
 
   /// Obtiene la lista de invitados de la sala desde la base de datos.
-  Future<void> _obtenerInvitados() async {
-    _sala!.invitados = await _gestorSalasService.obtenerInvitados(_sala!.id);
-    notifyListeners();
-  }
+  // Future<void> _obtenerInvitados() async {
+  //   _sala!.invitados = await _gestorSalasService.obtenerInvitados(_sala!.id);
+  //   notifyListeners();
+  // }
 
-  /// Inicia un temporizador que actualiza la lista de invitados cada 1 segundo.
-  void iniciarTimer() {
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      if (sala != null) {
-        await _obtenerInvitados();
-      }
-    });
-  }
 
-  /// Detiene el temporizador.
-  void detenerTimer() {
-    _timer?.cancel();
-  }
 
   Future<void> eliminarInvitado(Persona persona) async {
     _sala!.invitados.removeWhere((invitado) => invitado == persona);
@@ -127,5 +115,20 @@ class SalaProvider with ChangeNotifier {
     _sala!.bloqueados.add(persona);
     eliminarInvitado(persona);
     await _sincronizarBD();
+  }
+
+  //Actualizamos invitados cuando se notifica desde el socket
+  Future<void> actualizarInvitados() async {
+    GestorSalasService _gestorSalasService = GestorSalasService();
+
+    _sala!.invitados =
+        await _gestorSalasService.obtenerInvitados(_sala!.id);
+    notifyListeners();
+  }
+
+  Future<void> actualizarSala() async {
+    if (sala == null) return;
+    final nuevaSala = await GestorSalasService().obtenerSala(sala!.id);
+    setSala(nuevaSala);
   }
 }

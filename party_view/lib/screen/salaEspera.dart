@@ -1,10 +1,9 @@
 import 'package:party_view/provider/personaProvider.dart';
-import 'package:party_view/widget/ListViewInvitados.dart';
+import 'package:party_view/widget/listViewInvitados.dart';
 import 'package:provider/provider.dart';
 
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:flutter/material.dart';
-
 
 class SalaEspera extends StatefulWidget {
   const SalaEspera({super.key});
@@ -14,29 +13,14 @@ class SalaEspera extends StatefulWidget {
 
 class _SalaEsperaState extends State<SalaEspera> {
 
-  @override
-  ///Llama a didChangeDependencies cuando el widget se inserta en el árbol de widgets.
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-
-  }
-
-  @override
-  ///Detecta cuando se cierra la ventana y llama a el metodo [_onScreenClosed].
-  ///Llama a super.dispose() para asegurarse de que se liberen los recursos utilizados por el widget.
-  void dispose() {
-    super.dispose();
-  }
-
-
 
   @override
   Widget build(BuildContext context) {
-
     final personaProvider = Provider.of<PersonaProvider>(
-    context,
-    listen: false,
+      context,
+      listen: true,
     );
+
     ///Boton de salida
     return Scaffold(
       body: Body(
@@ -59,7 +43,7 @@ class _SalaEsperaState extends State<SalaEspera> {
               onPressed: () {
                 Navigator.pushNamed(
                   context,
-                  "/reproduccion"
+                  "/reproduccion",
                 );
               },
               child: Icon(Icons.play_arrow),
@@ -80,7 +64,11 @@ class Body extends StatelessWidget {
     return Center(
       child: Container(
         child: Column(
-          children: [MenuArriba(esAnfitrion: esAnfitrion), SizedBox(height: 20), ListaInvitados(esAnfitrion: esAnfitrion)],
+          children: [
+            MenuArriba(esAnfitrion: esAnfitrion),
+            SizedBox(height: 20),
+            ListaInvitados(esAnfitrion: esAnfitrion)
+          ],
         ),
         padding: EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -142,7 +130,7 @@ class _MenuArribaState extends State<MenuArriba> {
   @override
   Widget build(BuildContext context) {
     final _salaProvider = Provider.of<SalaProvider>(context, listen: true);
-    final _sala = _salaProvider.sala;
+
 
     return Container(
       child: Column(
@@ -152,7 +140,7 @@ class _MenuArribaState extends State<MenuArriba> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                _sala != null ? "Sala: #${_sala.id}" : "Cargando sala...",
+                _salaProvider.sala != null ? "Sala: #${_salaProvider.sala!.id}" : "Cargando sala...",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(width: 15),
@@ -160,7 +148,7 @@ class _MenuArribaState extends State<MenuArriba> {
                 children: [
                   Text(() {
                     try {
-                      return "Capacidad: ${_sala!.capacidad}";
+                      return "Capacidad: ${_salaProvider.sala!.capacidad}";
                     } catch (e) {
                       return "Capacidad no disponible";
                     }

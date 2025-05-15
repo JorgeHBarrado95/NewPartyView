@@ -18,7 +18,7 @@ class CustomSnackbar {
 
   static SnackBar error(String title, String message) {
     final _player = AudioPlayer();
-    _player.play(AssetSource("sounds/notificacionERROR.mp3"));
+    _player.play(AssetSource("sounds/error.mp3"));
 
     return SnackBar(
       elevation: 0,
@@ -34,7 +34,7 @@ class CustomSnackbar {
 
   static SnackBar info(String title, String message) {
     final _player = AudioPlayer();
-    _player.play(AssetSource("sounds/notificacionPOP.mp3"));
+    _player.play(AssetSource("sounds/pop.mp3"));
 
     return SnackBar(
       elevation: 0,

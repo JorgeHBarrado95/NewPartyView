@@ -1,6 +1,3 @@
-
-import 'dart:collection';
-
 import 'package:flutter/material.dart';
 import 'package:party_view/models/usuarioLogin.dart';
 import 'package:party_view/provider/personaProvider.dart';

@@ -95,36 +95,49 @@ class GestorSalasService {
     );
   }
 
-  /// Obtiene la lista de invitados de una sala específica.
+  /// Obtiene la lista de invitados de una sala específica, esto solo se usa para el anfitrion,
+  /// porq solo se necesita actualizar la lista de invitados.
   ///
   /// [id] El ID de la sala cuyos invitados se desean obtener.
   /// Retorna una lista de objetos [Persona].
   /// Lanza una excepción si ocurre un error durante la operación.
-  Future<List<Persona>> obtenerInvitados(String id) async {
-    final url = Uri.parse("${this.url}/${id}/invitados.json");
-    final response = await http.get(url);
+Future<List<Persona>> obtenerInvitados(String id) async {
+  final url = Uri.parse("${this.url}/${id}/invitados.json");
+  final response = await http.get(url);
 
-    if (response.statusCode != 200) {
-      throw Exception("Fallo al obtener invitados: ${response.body}");
-    }
-    if (response.body == "null" || response.body.isEmpty) {
-      // Si no hay invitados, devuelve una lista vacía.
-      return [];
-    }
-    final List<dynamic> data = jsonDecode(response.body);
-    final List<Persona> invitados =
-        data.map((item) {
-          return Persona.fromJson(item as Map<String, dynamic>);
-        }).toList();
-
-    return invitados;
+  if (response.statusCode != 200) {
+    throw Exception("Fallo al obtener invitados: ${response.body}");
   }
+  if (response.body == "null" || response.body.isEmpty) {
+    return [];
+  }
+
+  final data = jsonDecode(response.body);
+  final List<Persona> invitados = [];
+
+  if (data is List) {
+    for (var item in data) {
+      if (item != null) {
+        invitados.add(Persona.fromJson(item as Map<String, dynamic>));
+      }
+    }
+  } else if (data is Map) {
+    for (var item in data.values) {
+      if (item != null) {
+        invitados.add(Persona.fromJson(item as Map<String, dynamic>));
+      }
+    }
+  }
+
+  return invitados;
+}
 
   Future<dynamic> obtenerSala(String id) async {
     final url2 = Uri.parse("${this.url}/${id}.json");
     final response = await http.get(url2);
 
     final Map<String, dynamic> data = jsonDecode(response.body);
+
     return Sala.fromJson(id, data); 
   }
 
