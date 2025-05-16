@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:party_view/models/sala.dart';
 import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/customSnackBar.dart';
 import 'package:provider/provider.dart';
@@ -108,6 +109,40 @@ class WebSocketServicio {
             );
             await _salaProvider.actualizarSala();
             break;
+          
+          case "invitado-expulsado-bloqueado": //Notifica q se ha expulsado/bloqueado a un invitado de la sala
+            print("👤 Invitado expulsado");
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Invitado expulsado",
+                  "${data['message']}",
+                ),
+              );
+            final salaProvider = Provider.of<SalaProvider>(
+              context,
+              listen: false,
+            );
+
+            salaProvider.actualizarInvitados();
+            break;
+          case "expulsado":
+            print("👤 Expulsado de la sala");
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Expulsado",
+                  "${data['message']}",
+                ),
+              );
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              "/principal",
+              (route) => false,
+            );
+            break;
           case 'signal':
             print("📡 Signal recibido: $contenido");
             break;
@@ -207,19 +242,19 @@ class WebSocketServicio {
     print("object");
   
     _mandarMensaje("subir-capacidad", {
-      "id-sala": salaId,
+      "salaId": salaId,
     });
   }
 
   void disminuirCapacidad(String salaId) {
     _mandarMensaje("bajar-capacidad", {
-      "id-sala": salaId,
+      "salaId": salaId,
     });
   }
   
   void cambiarEstado(String salaId,String estado) {
     _mandarMensaje("cambiar-estado", {
-      "id-sala": salaId,
+      "salaId": salaId,
       "estado": estado,
     });
   }

@@ -7,6 +7,11 @@ import 'package:party_view/models/sala.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/services/webSocketService.dart';
 
+//final personaProvider = Provider.of<PersonaProvider>(
+//  context,
+//  listen: false,
+//);
+
 /// Proveedor que gestiona el estado de una sala y su sincronización con la base de datos.
 class SalaProvider with ChangeNotifier {
   final GestorSalasService _gestorSalasService = GestorSalasService();
