@@ -161,6 +161,24 @@ class WebSocketServicio {
               "/salaEspera",
             );
             break;
+          
+          case "videoON":
+            print("🔔 Video activado");
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Sala iniciada",
+                  "${data["message"]}",
+                ),
+              );
+
+            // Navigator.pushNamed(
+            //   context,
+            //   "/reproduccion",
+            // );
+
+            break;
           case "conexion":
             print("🔔 $data");
           default:
@@ -270,6 +288,12 @@ class WebSocketServicio {
     _mandarMensaje("bloquear-invitado", {
       "salaId": salaId,
       "uid": uid,
+    });
+  }
+
+  void video(String salaId){
+    _mandarMensaje("videoON",{
+      "salaId": salaId,
     });
   }
 }

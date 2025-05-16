@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:party_view/provider/personaProvider.dart';
+import 'package:party_view/services/webSocketService.dart';
 import 'package:party_view/widget/listViewInvitados.dart';
 import 'package:provider/provider.dart';
 
@@ -41,6 +44,12 @@ class _SalaEsperaState extends State<SalaEspera> {
             FloatingActionButton(
               heroTag: "btn2",
               onPressed: () {
+                final salaProvider = Provider.of<SalaProvider>(
+                  context,
+                  listen: false,
+                );
+                WebSocketServicio _webSocketServicio = WebSocketServicio();
+                _webSocketServicio.video(salaProvider.sala!.id);
                 Navigator.pushNamed(
                   context,
                   "/reproduccion",
