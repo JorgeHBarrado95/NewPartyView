@@ -108,11 +108,17 @@ class SalaProvider with ChangeNotifier {
     Future.microtask(
       () => notifyListeners(),
     ); // se asegura que se ejecute después
+
+    WebSocketServicio _webSocketServicio = WebSocketServicio();
+    _webSocketServicio.expulsarInvitado(_sala!.id, persona.uid);
   }
 
   Future<void> bloquearPersona(Persona persona) async {
     _sala!.bloqueados.add(persona);
     eliminarInvitado(persona);
+
+    WebSocketServicio _webSocketServicio = WebSocketServicio();
+    _webSocketServicio.bloquearInvitado(_sala!.id, persona.uid);
   }
 
   //Actualizamos invitados cuando se notifica desde el socket

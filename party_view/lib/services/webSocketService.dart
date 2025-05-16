@@ -223,4 +223,18 @@ class WebSocketServicio {
       "estado": estado,
     });
   }
+
+  void expulsarInvitado(String salaId, String uid) {
+    _mandarMensaje("expulsar-invitado", {
+      "salaId": salaId,
+      "uid": uid,
+    });
+  }
+
+  void bloquearInvitado(String salaId, String uid) {
+    _mandarMensaje("bloquear-invitado", {
+      "salaId": salaId,
+      "uid": uid,
+    });
+  }
 }
