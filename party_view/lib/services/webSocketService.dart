@@ -15,8 +15,6 @@ class WebSocketServicio {
 
   WebSocketChannel? _channel;
 
-
-  //String _url = "ws://servidorsocket-r8mu.onrender.com"; // Cambia esto a tu URL de WebSocket
   String _url = "ws://localhost:8081"; // Cambia 'https' por 'wss'
 
   void conexion(BuildContext context) async {
@@ -26,213 +24,47 @@ class WebSocketServicio {
 
   void _escucha(BuildContext context) {
     _channel?.stream.listen(
-      (message) async { // <-- Hacemos la función async
+      (message) async {
         final data = jsonDecode(message);
         final type = data['type'];
         final contenido = data["contenido"];
-
         switch (type) {
           case "error":
-            print("⚠️ Error: ");
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.error(
-                  "Error",
-                  "${data["message"]}",
-                ),
-              );
+            _handleError(context, data);
             break;
-          case "invitado-unido": //Notificacion para el anfitrion
-            print("👤 Nuevo invitado: ${contenido['nombre']}");
-
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Nuevo invitado",
-                  "${contenido['nombre']} esta ahora con nosotros!!",
-                ),
-              );
-            //Actualizamos la lista de invitados
-            final _salaProvider = Provider.of<SalaProvider>(
-              context,
-              listen: false,
-            );
-
-            _salaProvider.actualizarInvitados();
-
+          case "invitado-unido":
+            _handleInvitadoUnido(context, contenido);
             break;
-
-          case "unido-correctamente": //Notificaacion para el invitado
-            print("👤 Unido correctamente a la sala: #${data['salaId']}");
-
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Uniendote a la sala...",
-                  "${data["message"]}",
-                ),
-              );
-            
-            final _salaProvider = Provider.of<SalaProvider>(
-              context,
-              listen: false,
-            );
-
-            GestorSalasService _gestorSalasService = GestorSalasService();
-            final sala = await _gestorSalasService.obtenerSala(data['salaId']);
-            _salaProvider.setSala(sala);
-
-            Navigator.pushNamed(
-              context,
-              "/salaEspera",
-            );
-
+          case "unido-correctamente":
+            _handleUnidoCorrectamente(context, data);
             break;
-          //Cada vez q se une un invitado, se actualiza la sala
-          // case "actualizacion-sala":
-          //   print("Se ha actualizado la sala");
-          //   final _salaProvider = Provider.of<SalaProvider>(
-          //     context,
-          //     listen: false,
-          //   );
-          //   await _salaProvider.actualizarSala();
-          //   break;
-
           case "actualizacion-sala":
-            print("Se ha actualizado la sala");
-            final _salaProvider = Provider.of<SalaProvider>(
-              context,
-              listen: false,
-            );
-            await _salaProvider.actualizarSala();
+            _handleActualizacionSala(context);
             break;
-          
-          case "invitado-expulsado-bloqueado": //Notifica q se ha expulsado/bloqueado a un invitado de la sala
-            print("👤 Invitado expulsado");
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Invitado expulsado",
-                  "${data['message']}",
-                ),
-              );
-            final salaProvider = Provider.of<SalaProvider>(
-              context,
-              listen: false,
-            );
-
-            salaProvider.actualizarInvitados();
+          case "invitado-expulsado-bloqueado":
+            _handleInvitadoExpulsadoBloqueado(context, data);
             break;
           case "expulsado":
-            print("👤 Expulsado de la sala");
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Expulsado",
-                  "${data['message']}",
-                ),
-              );
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              "/principal",
-              (route) => false,
-            );
-            Provider.of<SalaProvider>(context, listen: false).clearSala();
+            _handleExpulsado(context, data);
             break;
           case "sala-creada":
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Sala creada",
-                  "${data["message"]}",
-                ),
-              );
-
-            Navigator.pushNamed(
-              context,
-              "/salaEspera",
-            );
+            _handleSalaCreada(context, data);
             break;
-          
           case "videoON":
-            print("🔔 Video activado");
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Sala iniciada",
-                  "${data["message"]}",
-                ),
-              );
-
-            // Navigator.pushNamed(
-            //   context,
-            //   "/reproduccion",
-            // );
-
+            _handleVideoON(context, data);
             break;
           case "conexion":
             print("🔔 $data");
+            break;
           case "saliste-sala":
-            ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  CustomSnackbar.info(
-                    "Abandonaste la sala",
-                    "${data['message']}",
-                  ),
-                );
-              Navigator.pushNamedAndRemoveUntil(
-                context,
-                "/principal",
-                (route) => false,
-              );
-
-            final personaProvider = Provider.of<PersonaProvider>(
-              context,
-              listen: false,
-            );
-            personaProvider.esAnfitrion = false;
-            Provider.of<SalaProvider>(context, listen: false).clearSala();
+            _handleSalisteSala(context, data);
             break;
           case "invitado-salio":
-            print("👤 Invitado salio de la sala");
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                CustomSnackbar.info(
-                  "Invitado salio",
-                  "${data['message']}",
-                ),
-              );
-            final salaProvider = Provider.of<SalaProvider>(
-              context,
-              listen: false,
-            );
-
-            salaProvider.actualizarInvitados();
+            _handleInvitadoSalio(context, data);
             break;
           case "salio-anfitrion":
-           ScaffoldMessenger.of(context)
-                ..hideCurrentSnackBar()
-                ..showSnackBar(
-                  CustomSnackbar.info(
-                    "Abandonando sala",
-                    "${data['message']}",
-                  ),
-                );
-            Navigator.pushNamedAndRemoveUntil(
-              context,
-              "/principal",
-              (route) => false,
-            );
-            Provider.of<SalaProvider>(context, listen: false).clearSala();
+            _handleSalioAnfitrion(context, data);
+            break;
           default:
             print("🔔 Mensaje recibido: $data");
         }
@@ -244,6 +76,150 @@ class WebSocketServicio {
         print("❌ Error de conexión: $error");
       },
     );
+  }
+
+  void _handleError(BuildContext context, dynamic data) {
+    print("⚠️ Error: ");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.error(
+          "Error",
+          "${data["message"]}",
+        ),
+      );
+  }
+
+  void _handleInvitadoUnido(BuildContext context, dynamic contenido) {
+    print("👤 Nuevo invitado: " + contenido['nombre']);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Nuevo invitado",
+          "${contenido['nombre']} esta ahora con nosotros!!",
+        ),
+      );
+    final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    _salaProvider.actualizarInvitados();
+  }
+
+  void _handleUnidoCorrectamente(BuildContext context, dynamic data) async {
+    print("👤 Unido correctamente a la sala: #${data['salaId']}");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Uniendote a la sala...",
+          "${data["message"]}",
+        ),
+      );
+    final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    GestorSalasService _gestorSalasService = GestorSalasService();
+    final sala = await _gestorSalasService.obtenerSala(data['salaId']);
+    _salaProvider.setSala(sala);
+    Navigator.pushNamed(context, "/salaEspera");
+  }
+
+  void _handleActualizacionSala(BuildContext context) async {
+    print("Se ha actualizado la sala");
+    final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    await _salaProvider.actualizarSala();
+  }
+
+  void _handleInvitadoExpulsadoBloqueado(BuildContext context, dynamic data) {
+    print("👤 Invitado expulsado");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Invitado expulsado",
+          "${data['message']}",
+        ),
+      );
+    final salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    salaProvider.actualizarInvitados();
+  }
+
+  void _handleExpulsado(BuildContext context, dynamic data) {
+    print("👤 Expulsado de la sala");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Expulsado",
+          "${data['message']}",
+        ),
+      );
+    Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);
+    Provider.of<SalaProvider>(context, listen: false).clearSala();
+  }
+
+  void _handleSalaCreada(BuildContext context, dynamic data) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Sala creada",
+          "${data["message"]}",
+        ),
+      );
+    Navigator.pushNamed(context, "/salaEspera");
+  }
+
+  void _handleVideoON(BuildContext context, dynamic data) {
+    print("🔔 Video activado");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Sala iniciada",
+          "${data["message"]}",
+        ),
+      );
+    // Navigator.pushNamed(context, "/reproduccion");
+  }
+
+  void _handleSalisteSala(BuildContext context, dynamic data) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Abandonaste la sala",
+          "${data['message']}",
+        ),
+      );
+    Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);
+    final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
+    personaProvider.esAnfitrion = false;
+    Provider.of<SalaProvider>(context, listen: false).clearSala();
+  }
+
+  void _handleInvitadoSalio(BuildContext context, dynamic data) {
+    print("👤 Invitado salio de la sala");
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Invitado salio",
+          "${data['message']}",
+        ),
+      );
+    final salaProvider = Provider.of<SalaProvider>(context, listen: false);
+    salaProvider.actualizarInvitados();
+  }
+
+  void _handleSalioAnfitrion(BuildContext context, dynamic data) {
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        CustomSnackbar.info(
+          "Abandonando sala",
+          "${data['message']}",
+        ),
+      );
+    Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);
+    Provider.of<SalaProvider>(context, listen: false).clearSala();
   }
 
   void crearSala(Sala sala) {
@@ -310,7 +286,7 @@ class WebSocketServicio {
 
   void incrementarCapacidad(String salaId) {
     print("object");
-  
+
     _mandarMensaje("subir-capacidad", {
       "salaId": salaId,
     });
@@ -321,8 +297,8 @@ class WebSocketServicio {
       "salaId": salaId,
     });
   }
-  
-  void cambiarEstado(String salaId,String estado) {
+
+  void cambiarEstado(String salaId, String estado) {
     _mandarMensaje("cambiar-estado", {
       "salaId": salaId,
       "estado": estado,
@@ -343,8 +319,8 @@ class WebSocketServicio {
     });
   }
 
-  void video(String salaId){
-    _mandarMensaje("videoON",{
+  void video(String salaId) {
+    _mandarMensaje("videoON", {
       "salaId": salaId,
     });
   }
@@ -355,5 +331,4 @@ class WebSocketServicio {
       "uid": uid,
     });
   }
-
 }
