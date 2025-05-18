@@ -84,7 +84,7 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.error(
-          "Error",
+          "❗ Error",
           "${data["message"]}",
         ),
       );
@@ -96,8 +96,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Nuevo invitado",
-          "${contenido['nombre']} esta ahora con nosotros!!",
+          "🙋 Nuevo invitado",
+          "${contenido['nombre']} está ahora con nosotros!!",
+          leading: Icon(Icons.person_add, color: Colors.blue, size: 28),
         ),
       );
     final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
@@ -110,8 +111,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Uniendote a la sala...",
+          "✅ Uniéndote a la sala...",
           "${data["message"]}",
+          leading: Icon(Icons.login, color: Colors.green, size: 28),
         ),
       );
     final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
@@ -133,8 +135,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Invitado expulsado",
+          "🚫 Invitado expulsado",
           "${data['message']}",
+          leading: Icon(Icons.person_remove, color: Colors.red, size: 28),
         ),
       );
     final salaProvider = Provider.of<SalaProvider>(context, listen: false);
@@ -147,8 +150,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Expulsado",
+          "❌ Expulsado",
           "${data['message']}",
+          leading: Icon(Icons.block, color: Colors.redAccent, size: 28),
         ),
       );
     Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);
@@ -160,8 +164,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Sala creada",
-          "${data["message"]}",
+          "🎉 Sala creada",
+          "${data["message"]} ¡Invita a tus amigos! 🥳",
+          leading: Icon(Icons.celebration, color: Colors.deepPurple, size: 28),
         ),
       );
     Navigator.pushNamed(context, "/salaEspera");
@@ -173,8 +178,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Sala iniciada",
+          "🎬 Sala iniciada",
           "${data["message"]}",
+          leading: Icon(Icons.play_circle_fill, color: Colors.green, size: 28),
         ),
       );
     // Navigator.pushNamed(context, "/reproduccion");
@@ -185,8 +191,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Abandonaste la sala",
+          "🚪 Abandonaste la sala",
           "${data['message']}",
+          leading: Icon(Icons.exit_to_app, color: Colors.grey, size: 28),
         ),
       );
     Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);
@@ -201,8 +208,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Invitado salio",
+          "👋 Invitado salió",
           "${data['message']}",
+          leading: Icon(Icons.person_off, color: Colors.orange, size: 28),
         ),
       );
     final salaProvider = Provider.of<SalaProvider>(context, listen: false);
@@ -214,8 +222,9 @@ class WebSocketServicio {
       ..hideCurrentSnackBar()
       ..showSnackBar(
         CustomSnackbar.info(
-          "Abandonando sala",
+          "👑 El anfitrión abandonó",
           "${data['message']}",
+          leading: Icon(Icons.king_bed, color: Colors.purple, size: 28),
         ),
       );
     Navigator.pushNamedAndRemoveUntil(context, "/principal", (route) => false);

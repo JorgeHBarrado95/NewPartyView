@@ -32,18 +32,25 @@ class CustomSnackbar {
     );
   }
 
-  static SnackBar info(String title, String message) {
-    // final _player = AudioPlayer();
-    // _player.play(AssetSource("sounds/pop.mp3"));
-
+  static SnackBar info(String title, String message, {Widget? leading, Color? background}) {
     return SnackBar(
       elevation: 0,
       behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.transparent,
-      content: AwesomeSnackbarContent(
-        title: title,
-        message: message,
-        contentType: ContentType.warning,
+      backgroundColor: background ?? Colors.transparent,
+      content: Row(
+        children: [
+          if (leading != null) ...[
+            leading,
+            SizedBox(width: 12),
+          ],
+          Expanded(
+            child: AwesomeSnackbarContent(
+              title: title,
+              message: message,
+              contentType: ContentType.warning,
+            ),
+          ),
+        ],
       ),
     );
   }
