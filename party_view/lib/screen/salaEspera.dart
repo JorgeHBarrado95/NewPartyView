@@ -23,6 +23,10 @@ class _SalaEsperaState extends State<SalaEspera> {
       context,
       listen: true,
     );
+    final salaProvider = Provider.of<SalaProvider>(
+      context,
+      listen: true,
+    );
 
     ///Boton de salida
     return Scaffold(
@@ -35,6 +39,8 @@ class _SalaEsperaState extends State<SalaEspera> {
           FloatingActionButton(
             heroTag: "btn1",
             onPressed: () {
+              WebSocketServicio _webSocketServicio = WebSocketServicio();
+              _webSocketServicio.abandonarSala(salaProvider.sala!.id, personaProvider.getPersona!.uid);
               Navigator.pop(context);
             },
             child: Icon(Icons.arrow_back),

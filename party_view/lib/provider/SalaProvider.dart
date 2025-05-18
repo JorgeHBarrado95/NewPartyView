@@ -7,7 +7,7 @@ import 'package:party_view/models/sala.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/services/webSocketService.dart';
 
-//final personaProvider = Provider.of<PersonaProvider>(
+//final salaProvider = Provider.of<SalaProvider>(
 //  context,
 //  listen: false,
 //);

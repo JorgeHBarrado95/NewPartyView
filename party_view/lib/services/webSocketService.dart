@@ -142,9 +142,7 @@ class WebSocketServicio {
               "/principal",
               (route) => false,
             );
-            break;
-          case 'signal':
-            print("📡 Signal recibido: $contenido");
+            Provider.of<SalaProvider>(context, listen: false).clearSala();
             break;
           case "sala-creada":
             ScaffoldMessenger.of(context)
@@ -181,6 +179,60 @@ class WebSocketServicio {
             break;
           case "conexion":
             print("🔔 $data");
+          case "saliste-sala":
+            ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  CustomSnackbar.info(
+                    "Abandonaste la sala",
+                    "${data['message']}",
+                  ),
+                );
+              Navigator.pushNamedAndRemoveUntil(
+                context,
+                "/principal",
+                (route) => false,
+              );
+
+            final personaProvider = Provider.of<PersonaProvider>(
+              context,
+              listen: false,
+            );
+            personaProvider.esAnfitrion = false;
+            Provider.of<SalaProvider>(context, listen: false).clearSala();
+            break;
+          case "invitado-salio":
+            print("👤 Invitado salio de la sala");
+            ScaffoldMessenger.of(context)
+              ..hideCurrentSnackBar()
+              ..showSnackBar(
+                CustomSnackbar.info(
+                  "Invitado salio",
+                  "${data['message']}",
+                ),
+              );
+            final salaProvider = Provider.of<SalaProvider>(
+              context,
+              listen: false,
+            );
+
+            salaProvider.actualizarInvitados();
+            break;
+          case "salio-anfitrion":
+           ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  CustomSnackbar.info(
+                    "Abandonando sala",
+                    "${data['message']}",
+                  ),
+                );
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              "/principal",
+              (route) => false,
+            );
+            Provider.of<SalaProvider>(context, listen: false).clearSala();
           default:
             print("🔔 Mensaje recibido: $data");
         }
@@ -232,7 +284,7 @@ class WebSocketServicio {
     required String roomId,
     required String uid,
   }) {
-    _mandarMensaje('leave-room', {
+    _mandarMensaje('abandonar-sala', {
       'roomId': roomId,
       'uid': uid,
     });
@@ -296,4 +348,12 @@ class WebSocketServicio {
       "salaId": salaId,
     });
   }
+
+  void abandonarSala(String salaId, String uid) {
+    _mandarMensaje("abandonar-sala", {
+      "salaId": salaId,
+      "uid": uid,
+    });
+  }
+
 }
