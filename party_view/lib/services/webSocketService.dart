@@ -183,7 +183,7 @@ class WebSocketServicio {
           leading: Icon(Icons.play_circle_fill, color: Colors.green, size: 28),
         ),
       );
-    // Navigator.pushNamed(context, "/reproduccion");
+    Navigator.pushNamed(context, "/reproduccion");
   }
 
   void _handleSalisteSala(BuildContext context, dynamic data) {
