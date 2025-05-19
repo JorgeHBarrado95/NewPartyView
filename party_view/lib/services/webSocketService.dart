@@ -16,8 +16,9 @@ class WebSocketServicio {
 
   WebSocketChannel? _channel;
 
-  String _url = "ws://localhost:8080"; 
+  //String _url = "ws://localhost:8080"; 
   //String _url ="ws://servidorsocket-r8mu.onrender.com";
+  String _url ="ws://192.168.0.15:8080";
 
   // --- WebRTC Signaling ---
   final Map<String, RTCPeerConnection> _peerConnections = {};
@@ -333,9 +334,49 @@ class WebSocketServicio {
     pc.onIceConnectionState = (state) {
       print('ICE state for $to: $state');
     };
-    final offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': offer.sdp, 'type': offer.type});
+    final offer = await pc.createOffer({
+      'offerToReceiveVideo': 1,
+      'offerToReceiveAudio': 1,
+      'voiceActivityDetection': false,
+      'mandatory': {},
+      'optional': [],
+    });
+    // Fuerza VP8 en el SDP
+    String sdpVp8 = _preferVP8(offer.sdp!);
+    await pc.setLocalDescription(RTCSessionDescription(sdpVp8, offer.type));
+    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': sdpVp8, 'type': offer.type});
+  }
+
+  /// Fuerza VP8 como único codec de video en el SDP
+  String _preferVP8(String sdp) {
+    final lines = sdp.split('\n');
+    final mLineIndex = lines.indexWhere((l) => l.startsWith('m=video'));
+    if (mLineIndex == -1) return sdp;
+    // Encuentra los payload types de VP8
+    final vp8RtpMap = RegExp(r'^a=rtpmap:(\d+) VP8/90000', multiLine: true);
+    final matches = vp8RtpMap.allMatches(sdp);
+    if (matches.isEmpty) return sdp;
+    final vp8Payloads = matches.map((m) => m.group(1)).toList();
+    if (vp8Payloads.isEmpty) return sdp;
+    // Reemplaza la línea m=video para solo incluir VP8
+    final mLine = lines[mLineIndex].split(' ');
+    final newMLine = mLine.sublist(0,3) + vp8Payloads.whereType<String>().toList();
+    lines[mLineIndex] = newMLine.join(' ');
+    // Elimina todos los a=rtpmap excepto VP8 y sus fmtp/fb
+    final allowed = vp8Payloads.toSet();
+    final filtered = <String>[];
+    for (var l in lines) {
+      if (l.startsWith('a=rtpmap:')) {
+        final pt = l.split(':')[1].split(' ')[0];
+        if (allowed.contains(pt)) filtered.add(l);
+      } else if (l.startsWith('a=fmtp:') || l.startsWith('a=rtcp-fb:')) {
+        final pt = l.split(':')[1].split(' ')[0];
+        if (allowed.contains(pt)) filtered.add(l);
+      } else if (!l.startsWith('a=rtpmap:') && !l.startsWith('a=fmtp:') && !l.startsWith('a=rtcp-fb:')) {
+        filtered.add(l);
+      }
+    }
+    return filtered.join('\n');
   }
 
   Future<void> handleOffer(String salaId, String from, String to, Map offer) async {
