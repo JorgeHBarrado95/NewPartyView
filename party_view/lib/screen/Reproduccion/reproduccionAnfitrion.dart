@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:party_view/widget/seleccionarPantalla.dart';
+import 'package:party_view/services/webSocketService.dart';
+import 'package:party_view/provider/SalaProvider.dart';
+import 'package:provider/provider.dart';
 
 class ReproduccionAnfitrion extends StatefulWidget {
   @override
@@ -118,10 +121,21 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
 
       stream.getVideoTracks()[0].onEnded = () {
         print('Captura de pantalla finalizada por el usuario.');
+        _colgar();
       };
 
       _localStream = stream;
       _localRenderer.srcObject = _localStream;
+
+      // --- INTEGRACIÓN WEBRTC BROADCAST ---
+      final salaProvider = Provider.of<SalaProvider>(context, listen: false);
+      final sala = salaProvider.sala;
+      if (sala != null) {
+        final anfitrionUid = sala.anfitrion.uid;
+        final invitadosUids = sala.invitados.map((inv) => inv.uid).toList();
+        await WebSocketServicio().startBroadcast(sala.id, anfitrionUid, invitadosUids, _localStream!);
+      }
+      // --- FIN INTEGRACIÓN ---
     } catch (e) {
       print('Error al iniciar captura de pantalla: $e');
 
@@ -157,6 +171,9 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
       await _localStream?.dispose();
       _localStream = null;
       _localRenderer.srcObject = null;
+      // --- LIMPIEZA WEBRTC ---
+      await WebSocketServicio().closeAllPeerConnections();
+      // --- FIN LIMPIEZA ---
     } catch (e) {
       print(e.toString());
     }

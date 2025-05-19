@@ -18,6 +18,9 @@ class PersonaProvider with ChangeNotifier {
   // Getter para 'nombre'.
   String get getNombre => _nombre;
 
+  // Getter para saber si la persona es anfitrión
+  bool get esAnfitrion => _persona?.esAnfitrion ?? false;
+
   // Setter para 'nombre'.
   set setNombre(String nuevoNombre) {
     _nombre = nuevoNombre;

@@ -7,6 +7,7 @@ import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/customSnackBar.dart';
 import 'package:provider/provider.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class WebSocketServicio {
   static final WebSocketServicio _instance = WebSocketServicio._internal();
@@ -15,7 +16,13 @@ class WebSocketServicio {
 
   WebSocketChannel? _channel;
 
-  String _url = "ws://localhost:8081"; // Cambia 'https' por 'wss'
+  String _url = "ws://localhost:8080"; 
+  //String _url ="ws://servidorsocket-r8mu.onrender.com";
+
+  // --- WebRTC Signaling ---
+  final Map<String, RTCPeerConnection> _peerConnections = {};
+  MediaStream? _localStream;
+  Function(MediaStream stream)? onRemoteStream;
 
   void conexion(BuildContext context) async {
     _channel = WebSocketChannel.connect(Uri.parse(_url));
@@ -65,6 +72,22 @@ class WebSocketServicio {
           case "salio-anfitrion":
             _handleSalioAnfitrion(context, data);
             break;
+          case 'signal':
+            final contenido = data['contenido'] ?? data['payload'] ?? {};
+            print('[SIGNAL] Mensaje recibido: $contenido');
+            final from = contenido['from']?.toString() ?? '';
+            final to = contenido['to']?.toString() ?? '';
+            final signalData = contenido['signalData'] ?? {};
+            final salaProvider = Provider.of<SalaProvider>(context, listen: false);
+            final salaId = salaProvider.sala?.id;
+            if (signalData['type'] == 'offer') {
+              await handleOffer(salaId!, from, to, signalData);
+            } else if (signalData['type'] == 'answer') {
+              await handleAnswer(from, signalData);
+            } else if (signalData['candidate'] != null) {
+              await handleCandidate(from, signalData['candidate']);
+            }
+            break;
           default:
             print("🔔 Mensaje recibido: $data");
         }
@@ -90,7 +113,7 @@ class WebSocketServicio {
       );
   }
 
-  void _handleInvitadoUnido(BuildContext context, dynamic contenido) {
+  void _handleInvitadoUnido(BuildContext context, dynamic contenido) async {
     print("👤 Nuevo invitado: " + contenido['nombre']);
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
@@ -102,7 +125,16 @@ class WebSocketServicio {
         ),
       );
     final _salaProvider = Provider.of<SalaProvider>(context, listen: false);
-    _salaProvider.actualizarInvitados();
+    await _salaProvider.actualizarInvitados();
+
+    final sala = _salaProvider.sala;
+    final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
+    if (sala != null && personaProvider.esAnfitrion && _localStream != null) {
+      final anfitrionUid = sala.anfitrion.uid;
+      final nuevoInvitadoUid = contenido['uid'];
+      await _createOfferForInvitado(sala.id, anfitrionUid, nuevoInvitadoUid);
+      print('Oferta enviada al nuevo invitado: ' + nuevoInvitadoUid);
+    }
   }
 
   void _handleUnidoCorrectamente(BuildContext context, dynamic data) async {
@@ -183,7 +215,7 @@ class WebSocketServicio {
           leading: Icon(Icons.play_circle_fill, color: Colors.green, size: 28),
         ),
       );
-    Navigator.pushNamed(context, "/reproduccion");
+    Navigator.pushNamed(context, "/reproduccionInvitado");
   }
 
   void _handleSalisteSala(BuildContext context, dynamic data) {
@@ -275,6 +307,78 @@ class WebSocketServicio {
     });
   }
 
+  Future<void> startBroadcast(String salaId, String anfitrionUid, List<String> invitadosUids, MediaStream stream) async {
+    _localStream = stream;
+    for (final uid in invitadosUids) {
+      await _createOfferForInvitado(salaId, anfitrionUid, uid);
+    }
+  }
+
+  Future<void> _createOfferForInvitado(String salaId, String from, String to) async {
+    final pc = await createPeerConnection({
+      'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'}
+      ]
+    });
+    _peerConnections[to] = pc;
+    if (_localStream != null) {
+      // Usar addTrack en vez de addStream para Unified Plan
+      for (var track in _localStream!.getTracks()) {
+        await pc.addTrack(track, _localStream!);
+      }
+    }
+    pc.onIceCandidate = (candidate) {
+      sendSignal(roomId: salaId, from: from, to: to, signalData: {'candidate': candidate.toMap()});
+    };
+    pc.onIceConnectionState = (state) {
+      print('ICE state for $to: $state');
+    };
+    final offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': offer.sdp, 'type': offer.type});
+  }
+
+  Future<void> handleOffer(String salaId, String from, String to, Map offer) async {
+    print('[INVITADO] Recibida oferta de $from para $to en sala $salaId');
+    final pc = await createPeerConnection({
+      'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'}
+      ]
+    });
+    _peerConnections[from] = pc;
+    // Usar onTrack para Unified Plan
+    pc.onTrack = (RTCTrackEvent event) {
+      print('[INVITADO] onTrack recibido, streams: ${event.streams.length}');
+      if (event.streams.isNotEmpty && onRemoteStream != null) {
+        print('[INVITADO] Llamando a onRemoteStream con el stream remoto');
+        onRemoteStream!(event.streams[0]);
+      }
+    };
+    pc.onIceCandidate = (candidate) {
+      print('[INVITADO] Enviando ICE candidate al anfitrión');
+      sendSignal(roomId: salaId, from: to, to: from, signalData: {'candidate': candidate.toMap()});
+    };
+    await pc.setRemoteDescription(RTCSessionDescription(offer['sdp'], offer['type']));
+    final answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    print('[INVITADO] Enviando answer al anfitrión');
+    sendSignal(roomId: salaId, from: to, to: from, signalData: {'sdp': answer.sdp, 'type': answer.type});
+  }
+
+  Future<void> handleAnswer(String from, Map answer) async {
+    final pc = _peerConnections[from];
+    if (pc != null) {
+      await pc.setRemoteDescription(RTCSessionDescription(answer['sdp'], answer['type']));
+    }
+  }
+
+  Future<void> handleCandidate(String from, Map candidate) async {
+    final pc = _peerConnections[from];
+    if (pc != null) {
+      await pc.addCandidate(RTCIceCandidate(candidate['candidate'], candidate['sdpMid'], candidate['sdpMLineIndex']));
+    }
+  }
+
   void _mandarMensaje(String type, Map<String, dynamic> payload) {
     if (_channel == null) {
       print("⚠️ No conectado o sin token");
@@ -339,5 +443,23 @@ class WebSocketServicio {
       "salaId": salaId,
       "uid": uid,
     });
+  }
+
+  /// Cierra todas las PeerConnections y limpia el stream local
+  Future<void> closeAllPeerConnections() async {
+    for (final pc in _peerConnections.values) {
+      try {
+        await pc.close();
+      } catch (e) {
+        print('Error cerrando PeerConnection: ' + e.toString());
+      }
+    }
+    _peerConnections.clear();
+    try {
+      await _localStream?.dispose();
+    } catch (e) {
+      print('Error limpiando localStream: ' + e.toString());
+    }
+    _localStream = null;
   }
 }

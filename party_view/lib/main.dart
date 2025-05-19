@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:party_view/provider/personaProvider.dart';
+import 'package:party_view/screen/Reproduccion/reproduccionAnfitrion.dart';
+import 'package:party_view/screen/Reproduccion/reproduccionInvitado.dart';
 import 'package:party_view/screen/principal.dart';
 import 'package:party_view/screen/Registro/login.dart';
 import 'package:party_view/screen/Registro/registro.dart';
@@ -32,7 +34,8 @@ class MyApp extends StatelessWidget {
         "/registro": (context) => RegistroScreen(),
          "/principal": (context) => Principal(),
          "/salaEspera": (context) => SalaEspera(),
-        // "/reproduccion": (context) => ReproduccionAnfitrion(),
+         "/reproduccion": (context) => ReproduccionAnfitrion(),
+         "/reproduccionInvitado": (context) => ReproduccionInvitado(),
       },
     );
   }

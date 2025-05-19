@@ -222,50 +222,46 @@ class SeleccionarPantalla extends Dialog {
                               child: TabBarView(children: [
                                 Align(
                                   alignment: Alignment.center,
-                                  child: Expanded(
-                                    child: GridView.count(
-                                      crossAxisSpacing: 8,
-                                      crossAxisCount: 2,
-                                      children: _sources.entries
-                                          .where((element) =>
-                                              element.value.type ==
-                                              SourceType.Screen)
-                                          .map((e) => ThumbnailWidget(
-                                                onTap: (source) {
-                                                  setState(() {
-                                                    _selected_source = source;
-                                                  });
-                                                },
-                                                source: e.value,
-                                                selected: _selected_source?.id ==
-                                                    e.value.id,
-                                              ))
-                                          .toList(),
-                                    ),
+                                  child: GridView.count(
+                                    crossAxisSpacing: 8,
+                                    crossAxisCount: 2,
+                                    children: _sources.entries
+                                        .where((element) =>
+                                            element.value.type ==
+                                            SourceType.Screen)
+                                        .map((e) => ThumbnailWidget(
+                                              onTap: (source) {
+                                                setState(() {
+                                                  _selected_source = source;
+                                                });
+                                              },
+                                              source: e.value,
+                                              selected: _selected_source?.id ==
+                                                  e.value.id,
+                                            ))
+                                        .toList(),
                                   ),
                                 ),
                                 Align(
                                   alignment: Alignment.center,
-                                  child: Expanded(
-                                    child: GridView.count(
-                                      crossAxisSpacing: 8,
-                                      crossAxisCount: 3,
-                                      children: _sources.entries
-                                          .where((element) =>
-                                              element.value.type ==
-                                              SourceType.Window)
-                                          .map((e) => ThumbnailWidget(
-                                                onTap: (source) {
-                                                  setState(() {
-                                                    _selected_source = source;
-                                                  });
-                                                },
-                                                source: e.value,
-                                                selected: _selected_source?.id ==
-                                                    e.value.id,
-                                              ))
-                                          .toList(),
-                                    ),
+                                  child: GridView.count(
+                                    crossAxisSpacing: 8,
+                                    crossAxisCount: 3,
+                                    children: _sources.entries
+                                        .where((element) =>
+                                            element.value.type ==
+                                            SourceType.Window)
+                                        .map((e) => ThumbnailWidget(
+                                              onTap: (source) {
+                                                setState(() {
+                                                  _selected_source = source;
+                                                });
+                                              },
+                                              source: e.value,
+                                              selected: _selected_source?.id ==
+                                                  e.value.id,
+                                            ))
+                                        .toList(),
                                   ),
                                 ),
                               ]),
