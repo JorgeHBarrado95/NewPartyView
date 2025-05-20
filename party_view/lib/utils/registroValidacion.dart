@@ -75,7 +75,7 @@ class Registrovalidacion {
     //Llamo al servicio de registro, al cual le paso el objeto UsuarioLogin
     try {
         int estadoRegistro = await Loginservice(
-          personaProvider,
+          personaProvider, context,
         ).registro(_usuarioLogin);
 
         if (estadoRegistro == 0) {
