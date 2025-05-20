@@ -98,7 +98,7 @@ class _PrincipalState extends State<Principal> {
                                     child: TextField(
                                       decoration: InputDecoration(
                                         prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
-                                        hintText: 'Buscador de sala',
+                                        hintText: "Buscador de sala",
                                         filled: true,
                                         fillColor: Colors.white.withOpacity(0.85),
                                         border: OutlineInputBorder(

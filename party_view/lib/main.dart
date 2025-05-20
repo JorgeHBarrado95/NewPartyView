@@ -4,6 +4,7 @@ import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/screen/Registro/verificarCorreo.dart';
 import 'package:party_view/screen/Reproduccion/reproduccionAnfitrion.dart';
 import 'package:party_view/screen/Reproduccion/reproduccionInvitado.dart';
+import 'package:party_view/screen/perfil.dart';
 import 'package:party_view/screen/principal.dart';
 import 'package:party_view/screen/Registro/login.dart';
 import 'package:party_view/screen/Registro/registro.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         "/verificarCorreo": (context) => VerificarCorreoScreen(),
          "/salaEspera": (context) => SalaEspera(),
          "/principal": (context) => Principal(),
+         "/perfil": (context) => PerfilScreen(),
          "/reproduccion": (context) => ReproduccionAnfitrion(),
          "/reproduccionInvitado": (context) => ReproduccionInvitado(),
 
