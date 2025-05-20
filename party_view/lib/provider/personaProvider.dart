@@ -37,11 +37,14 @@ class PersonaProvider with ChangeNotifier {
     notifyListeners(); 
   }
 
-  void setFotoUrl(String url) {
+  Future<void> setFotoUrl(String url, BuildContext context) async {
     if (_persona != null) {
       _persona!.fotoUrl = url;
+      notifyListeners();
     }
-    notifyListeners();
+    Loginservice _loginService = Loginservice();
+    await _loginService.cambiarFoto(url, _token,false,context);
+   
   }
 
   Future<void> crearPersona(String nombre, String uid, String token) async {
