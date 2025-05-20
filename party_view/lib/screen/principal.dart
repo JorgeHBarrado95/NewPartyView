@@ -1,16 +1,15 @@
-import "package:flutter/material.dart";
-import "package:party_view/models/sala.dart";
-import "package:party_view/provider/SalaProvider.dart";
-import "package:party_view/provider/personaProvider.dart";
-import "package:party_view/services/gestorSalasService.dart";
-import "package:party_view/services/webSocketService.dart";
-import "package:party_view/widget/listViewSala.dart";
-import "package:provider/provider.dart";
+import 'package:flutter/material.dart';
+import 'package:party_view/models/sala.dart';
+import 'package:party_view/services/gestorSalasService.dart';
+import 'package:party_view/widget/listViewSala.dart';
+import 'package:provider/provider.dart';
+import 'package:party_view/provider/personaProvider.dart';
+import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/services/webSocketService.dart';
 
 class Principal extends StatefulWidget {
   Principal({super.key});
 
-  @override
   _PrincipalState createState() => _PrincipalState();
 }
 
@@ -26,139 +25,209 @@ class _PrincipalState extends State<Principal> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        children: [
-          // Fondo degradado
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.deepPurple, Colors.purpleAccent],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-              ),
-            ),
-          ),
-          Column(
-            children: [
-              // Encabezado
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Party View",
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Center(
-                      child: Text(
-                        "Explora y únete a salas disponibles",
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white70,
-                        ),
-                      ),
+      backgroundColor: const Color(0xFFF5F8EE),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(height: 32),
+            ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return LinearGradient(
+                  colors: [Colors.purpleAccent, Colors.deepPurple, Colors.teal],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(bounds);
+              },
+              child: Text(
+                "Party View",
+                style: TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 12,
+                      color: Colors.black26,
+                      offset: Offset(2, 4),
                     ),
                   ],
                 ),
+                textAlign: TextAlign.center,
               ),
-              Expanded(
-                child: FutureBuilder<List<Sala>>(
-                  future: _futureSalas,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(child: CircularProgressIndicator());
-                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return Center(
-                        child: Text(
-                          "No hay salas disponibles",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.white,
-                          ),
-                        ),
-                      );
-                    } else if (snapshot.hasError) {
-                      return Center(
-                        child: Text(
-                          "Error al cargar las salas",
-                          style: TextStyle(
-                            fontSize: 18,
-                            color: Colors.redAccent,
-                          ),
-                        ),
-                      );
-                    } else {
-                      return ListViewSala(salas: snapshot.data!);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                FloatingActionButton(
-                  onPressed: () {
-                    setState(() {
-                      _futureSalas = GestorSalasService().getSalas();
-                    });
-                  },
-                  backgroundColor: Colors.white, // Botón blanco
-                  child: Icon(Icons.refresh, color: Colors.deepPurple), // Ícono púrpura
-                  heroTag: "refresh",
-                ),
-                SizedBox(height: 16),
-
-                //CREAR SALAS
-                FloatingActionButton(
-                  onPressed: () async {
-                    //Sala nueva
-
-                    final personaProvider = Provider.of<PersonaProvider>(
-                      context,
-                      listen: false,
-                    );
-
-                    final salaProvider = Provider.of<SalaProvider>(
-                      context,
-                      listen: false,
-                    );
-
-                    personaProvider.esAnfitrion = true;
-
-                    // Crear sala en el proveedor
-                    await salaProvider.crearSala(personaProvider.getPersona!);
-
-                    // Sincronizar sala con Firebase
-                    final gestorSalasService = GestorSalasService();
-                    await gestorSalasService.actualizarSala(salaProvider.sala!);
-
-                    // Conectar al WebSocket y crear la sala
-                    final _socket = WebSocketServicio();
-                    _socket.conexion(context);
-                    _socket.crearSala(salaProvider.sala!);
-                  },
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.add, color: Colors.purpleAccent),
-                  heroTag: "add",
-                ),
-              ],
             ),
+            SizedBox(height: 24),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    double maxWidth = constraints.maxWidth;
+                    double maxHeight = constraints.maxHeight;
+                    double containerWidth = (maxWidth * 0.8).clamp(350.0, 900.0);
+                    double containerHeight = (maxHeight * 0.8).clamp(400.0, 700.0);
+                    return Center(
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                        width: containerWidth,
+                        height: containerHeight,
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [Color(0xFF319EA1), Color(0xFF6DD5ED)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 18,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      decoration: InputDecoration(
+                                        prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
+                                        hintText: 'Buscador de sala',
+                                        filled: true,
+                                        fillColor: Colors.white.withOpacity(0.85),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                        contentPadding: EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.deepPurple,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        IconButton(
+                                          icon: const Icon(Icons.home),
+                                          color: Colors.white,
+                                          onPressed: () {},
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(Icons.person),
+                                          color: Colors.white,
+                                          onPressed: () {
+                                            Navigator.pushNamed(context, "/perfil");
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: FutureBuilder<List<Sala>>(
+                                  future: _futureSalas,
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.waiting) {
+                                      return Center(child: CircularProgressIndicator(color: Colors.deepPurple));
+                                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                                      return Center(
+                                        child: Text(
+                                          "No hay salas disponibles",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    } else if (snapshot.hasError) {
+                                      return Center(
+                                        child: Text(
+                                          "Error al cargar las salas",
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            color: Colors.redAccent,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                      );
+                                    } else {
+                                      return ListViewSala(salas: snapshot.data!);
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () {
+              setState(() {
+                _futureSalas = GestorSalasService().getSalas();
+              });
+            },
+            backgroundColor: Colors.white,
+            child: Icon(Icons.refresh, color: Colors.deepPurple),
+            heroTag: "btn1",
+          ),
+          SizedBox(height: 16),
+          FloatingActionButton(
+            onPressed: () async {
+              final personaProvider = Provider.of<PersonaProvider>(
+                context,
+                listen: false,
+              );
+              final salaProvider = Provider.of<SalaProvider>(
+                context,
+                listen: false,
+              );
+              personaProvider.esAnfitrion = true;
+              await salaProvider.crearSala(personaProvider.getPersona!);
+              final gestorSalasService = GestorSalasService();
+              await gestorSalasService.actualizarSala(salaProvider.sala!);
+              final _socket = WebSocketServicio();
+              _socket.conexion(context);
+              _socket.crearSala(salaProvider.sala!);
+            },
+            backgroundColor: Colors.white,
+            child: Icon(Icons.add, color: Colors.purpleAccent),
+            heroTag: "btn2",
           ),
         ],
       ),
     );
   }
 }
+
+
