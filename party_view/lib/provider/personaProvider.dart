@@ -37,6 +37,13 @@ class PersonaProvider with ChangeNotifier {
     notifyListeners(); 
   }
 
+  void setFotoUrl(String url) {
+    if (_persona != null) {
+      _persona!.fotoUrl = url;
+    }
+    notifyListeners();
+  }
+
   Future<void> crearPersona(String nombre, String uid, String token) async {
     _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid); 
     _token = token;

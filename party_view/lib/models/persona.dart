@@ -2,6 +2,7 @@ class Persona {
   String nombre;
   bool esAnfitrion;
   String uid;
+  String fotoUrl= "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
 
   Persona({
     required this.nombre,
