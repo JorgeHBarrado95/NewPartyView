@@ -16,7 +16,7 @@ class Registrovalidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "¡Faltan campos por rellenar!",
+            "❗ ¡Faltan campos por rellenar!",
             "",
           ),
         );
@@ -28,7 +28,7 @@ class Registrovalidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "¡Pon un correo valido!",
+            "📧 ¡Pon un correo valido!",
             "",
           ),
         );
@@ -40,7 +40,7 @@ class Registrovalidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "La contraseña debe tener al menos 6 caracteres",
+            "🔒 La contraseña debe tener al menos 6 caracteres",
             "",
           ),
         );
@@ -52,7 +52,7 @@ class Registrovalidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "Las contraseñas no coinciden",
+            "🔑 Las contraseñas no coinciden",
             "",
           ),
         );
@@ -83,8 +83,51 @@ class Registrovalidacion {
           print("Registro exitoso");
         } else if (estadoRegistro == 3) {
           print("El correo ya está en uso");
+
+          ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "📧 El correo ya está en uso",
+              "",
+            ),
+          );
+          return;
+        } else if (estadoRegistro == 1) {
+          print("Error en el registro");
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              CustomSnackbar.error(
+                "❌ Error en el registro",
+                "Reinicia la app y vuelve a intentarlo",
+              ),
+            );
+          return;
+        } else if (estadoRegistro == 2) {
+          print("Error en la contraseña o @");
+
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              CustomSnackbar.error(
+                "🔑 Error en la contraseña o gmail",
+                "",
+              ),
+            );
+          return;
         } else {
           print("Error desconocido");
+
+          ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "❓ Error desconocido",
+              "Se recomienda reiniciar la app y actualizarla",
+            ),
+          );
         }
       } catch (e) {
         print(e);

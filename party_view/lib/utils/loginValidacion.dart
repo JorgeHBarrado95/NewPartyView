@@ -17,7 +17,7 @@ class LoginValidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "¡Faltan campos por rellenar!",
+            "❗ ¡Faltan campos por rellenar!",
             "",
           ),
         );
@@ -29,7 +29,7 @@ class LoginValidacion {
         ..hideCurrentSnackBar()
         ..showSnackBar(
           CustomSnackbar.error(
-            "¡Pon un correo valido!",
+            "📧 ¡Pon un correo valido!",
             "",
           ),
         );
@@ -56,8 +56,26 @@ class LoginValidacion {
         print("iniciado sesion");
         Navigator.pushNamed(context, "/principal");
       } else if (estadoLogin == 1) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "🔑 ¡Error en la contraseña o gmail!",
+              "",
+            ),
+          );
         print("Error en la contraseña o @");
+
+        return;
       } else {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "❓¡Error desconocido!",
+              "Se recomienda reiniciar la app y actualizarla",
+            ),
+          );
         print("Error desconocido");
       }
     } catch (e) {
@@ -67,4 +85,4 @@ class LoginValidacion {
 
   }
 }
-  
+
