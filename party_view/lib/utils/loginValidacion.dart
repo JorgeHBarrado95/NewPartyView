@@ -50,7 +50,7 @@ class LoginValidacion {
 
    //Llamo al servicio de login, al cual le paso el objeto UsuarioLogin
     try {
-      int estadoLogin = await Loginservice(personaProvider, context).login(_usuarioLogin);
+      int estadoLogin = await Loginservice().login(_usuarioLogin,personaProvider);
 
       if (estadoLogin == 0) {
         print("iniciado sesion");

@@ -8,9 +8,9 @@ import "package:party_view/provider/personaProvider.dart";
 
 /// Servicio que gestiona el registro y login de usuarios utilizando Firebase Authentication, enviando y recibiendo peticiones HTTP.
 class Loginservice {
-  final PersonaProvider personaProvider;
-  final BuildContext context;
-  Loginservice(this.personaProvider,this.context);
+  // final PersonaProvider personaProvider;
+  // final BuildContext context;
+  // Loginservice(this.personaProvider,this.context);
 
   /// URL para registrar un nuevo usuario.
   final urlRegister = Uri.parse(
@@ -45,7 +45,7 @@ class Loginservice {
   /// - `3` si el correo electrónico ya está en uso.
   
   late final String _token;
-  Future<int> registro(UsuarioLogin _usuarioLogin) async {
+  Future<int> registro(UsuarioLogin _usuarioLogin, BuildContext context, PersonaProvider personaProvider) async {
     //print(_usuarioLogin.toString());
     final _respuesta = await http.post(
       urlRegister,
@@ -142,7 +142,7 @@ class Loginservice {
   /// - `0` si el inicio de sesión fue exitoso.
   /// - `1` si hay un error en la contraseña o correo electrónico.
   /// - `2` si ocurrió un error desconocido.
-  Future<int> login(UsuarioLogin _usuarioLogin) async {
+  Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) async {
     final _respuesta = await http.post(
       urlLogin,
       headers: {"Content-Type": "application/json"},

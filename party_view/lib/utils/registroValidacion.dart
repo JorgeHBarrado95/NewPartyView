@@ -74,9 +74,7 @@ class Registrovalidacion {
 
     //Llamo al servicio de registro, al cual le paso el objeto UsuarioLogin
     try {
-        int estadoRegistro = await Loginservice(
-          personaProvider, context,
-        ).registro(_usuarioLogin);
+        int estadoRegistro = await Loginservice().registro(_usuarioLogin, context, personaProvider);
 
         if (estadoRegistro == 0) {
           Navigator.pushNamed(context, "/principal");
