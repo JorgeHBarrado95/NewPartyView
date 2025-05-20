@@ -41,7 +41,7 @@ class fotoPerfil extends StatelessWidget {
                       children: imagenes.map((url) => GestureDetector(
                         onTap: () {
                           final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
-                          personaProvider.setFotoUrl(url);
+                          personaProvider.setFotoUrl(url, context);
                           Navigator.of(context).pop();
                         },
                         child: CircleAvatar(

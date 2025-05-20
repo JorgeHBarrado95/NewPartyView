@@ -229,4 +229,40 @@ class Loginservice {
       }
     }
   }
+
+  Future <void> cambiarFoto(String url, String token, bool automatico, [BuildContext? context]) async {
+    final _respuesta = await http.post(
+      urlUpdate,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "idToken": token,
+        "photoUrl": url,
+        "returnSecureToken": true,
+      }),
+    );
+
+    if (!automatico){ 
+      if(_respuesta.statusCode==200){
+        print("Nombre cambiado");
+        ScaffoldMessenger.of(context!)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.aprobacion(
+              "Nombre actualizado",
+              "",
+            ),
+          );
+      }else{
+        print("Error al cambiar el nombre");
+        ScaffoldMessenger.of(context!)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "¡Error al cambiar de nombre!",
+              "Reinicia la app o vuelve a intentarlo mas tarde",
+            ),
+          );
+      }
+    }
+  }
 }
