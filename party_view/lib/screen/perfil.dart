@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:party_view/provider/personaProvider.dart';
+import 'package:provider/provider.dart';
 
 class PerfilScreen extends StatelessWidget {
   @override
@@ -129,13 +131,32 @@ class PerfilScreen extends StatelessWidget {
   }
 }
 
-class cambiarNombre extends StatelessWidget {
-  const cambiarNombre({
-    super.key,
-  });
+class cambiarNombre extends StatefulWidget {
+  const cambiarNombre({super.key});
+
+  @override
+  State<cambiarNombre> createState() => _cambiarNombreState();
+}
+
+class _cambiarNombreState extends State<cambiarNombre> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
+    _controller = TextEditingController(text: personaProvider.getNombre);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final personaProvider = Provider.of<PersonaProvider>(context, listen: true);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -151,9 +172,10 @@ class cambiarNombre extends StatelessWidget {
         SizedBox(
           width: 180,
           child: TextField(
+            controller: _controller,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: "Nuevo nombre",
+              hintText: personaProvider.getNombre,
               hintStyle: const TextStyle(color: Colors.white70),
               filled: true,
               fillColor: Colors.deepPurple.withOpacity(0.3),
@@ -167,8 +189,11 @@ class cambiarNombre extends StatelessWidget {
         ),
         const SizedBox(width: 16),
         ElevatedButton(
-          onPressed: () {
-            // Acción para cambiar el nombre
+          onPressed: () async {
+            final nuevoNombre = _controller.text.trim();
+            if (nuevoNombre.isNotEmpty) {
+              await Provider.of<PersonaProvider>(context, listen: false).setNombre(nuevoNombre, context);
+            }
           },
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.deepPurple,

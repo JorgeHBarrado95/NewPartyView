@@ -3,12 +3,10 @@ class Persona {
   bool esAnfitrion;
   String uid;
 
-
   Persona({
     required this.nombre,
     required this.esAnfitrion,
     required this.uid,
-
   });
 
   factory Persona.fromJson(Map<String, dynamic> json) {

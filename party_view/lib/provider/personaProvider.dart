@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:party_view/models/persona.dart';
+import 'package:party_view/services/loginService.dart';
 
 //COMO INICIALIZAR EL PROVIDER
 //final personaProvider = Provider.of<PersonaProvider>(
@@ -9,32 +10,36 @@ import 'package:party_view/models/persona.dart';
 
 /// Proveedor de ejemplo para manejar un contador.
 class PersonaProvider with ChangeNotifier {
-  Persona? _persona; // Define la variable 'persona'.
-  String _nombre = ""; // Define la variable 'nombre'.
+  Persona? _persona; 
+  String _nombre = ""; 
+  String _token = "";
 
-  // Getter para 'persona'.
   Persona? get getPersona => _persona;
-
-  // Getter para 'nombre'.
   String get getNombre => _nombre;
-
-  // Getter para saber si la persona es anfitrión
   bool get esAnfitrion => _persona?.esAnfitrion ?? false;
 
-  // Setter para 'nombre'.
-  set setNombre(String nuevoNombre) {
+  Future<void> setNombre(String nuevoNombre, BuildContext context) async {
+    print(_token);
     _nombre = nuevoNombre;
-    notifyListeners(); // Notifica a los oyentes sobre el cambio.
+    _persona!.nombre = nuevoNombre;
+    Loginservice _loginService = Loginservice();
+    await _loginService.cambiarNombre(nuevoNombre, _token, false, context); 
+    notifyListeners(); 
   }
 
   set esAnfitrion(bool esAnfitrion) {
-    _persona!.esAnfitrion = esAnfitrion; // Cambia el estado de 'esAnfitrion'.
-    notifyListeners(); // Notifica a los oyentes sobre el cambio.
+    _persona!.esAnfitrion = esAnfitrion; 
+    notifyListeners(); 
+  }
+
+  set setToken(String token) {
+    _token = token;
+    notifyListeners(); 
   }
 
   Future<void> crearPersona(String nombre, String uid, String token) async {
-    // Cambia a Future para manejar la asincronía.
-    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid); // Crea y asigna la persona.
+    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid); 
+    _token = token;
     print("persona creada");
   }
 

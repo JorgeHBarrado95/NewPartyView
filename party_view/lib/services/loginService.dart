@@ -4,6 +4,8 @@ import "package:flutter/material.dart";
 import "package:http/http.dart" as http;
 import "package:party_view/models/usuarioLogin.dart";
 import "package:party_view/provider/personaProvider.dart";
+import "package:party_view/widget/customSnackBar.dart";
+import "package:provider/provider.dart";
 
 
 /// Servicio que gestiona el registro y login de usuarios utilizando Firebase Authentication, enviando y recibiendo peticiones HTTP.
@@ -64,6 +66,14 @@ class Loginservice {
       String _uid = responseData["localId"];
       _token = responseData["idToken"];
 
+
+      final personaProvider = Provider.of<PersonaProvider>(
+      context,
+      listen: true,
+      );
+      //personaProvider.getPersona!.token=_token;
+      personaProvider.setToken=_token;
+
       //Mandamos el correo de verificación
       mandarCorreo();
 
@@ -78,18 +88,21 @@ class Loginservice {
         await Future.delayed(Duration(seconds: 2));
       }
 
+      // //Actualiza el displayName
+      // final _respuesta2 = await http.post(
+      //   urlUpdate,
+      //   headers: {"Content-Type": "application/json"},
+      //   body: jsonEncode({
+      //     "idToken": _token,
+      //     "displayName": _usuarioLogin.nombre,
+      //     "returnSecureToken": true,
+      //   }),
+      // );
+
       //Actualiza el displayName
-      final _respuesta2 = await http.post(
-        urlUpdate,
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "idToken": _token,
-          "displayName": _usuarioLogin.nombre,
-          "returnSecureToken": true,
-        }),
-      );
+      cambiarNombre(_usuarioLogin.nombre!, _token, false);
       
-      if (_respuesta2.statusCode == 200) {
+      if (_respuesta.statusCode == 200) {
         await personaProvider.crearPersona(_usuarioLogin.nombre ?? "usuario",_uid, _token); ///Se crea la persona y se almacena de manera local
         _usuarioLogin.borrarDatos(); // Borra los datos del usuario
 
@@ -175,6 +188,45 @@ class Loginservice {
     } else {
       print("Error desconocido");
       return 2; // Error desconocido.
+    }
+  }
+  
+  //Actualiza el displayName
+  ///[automatico] Si es true, es q el metodo se esta usando al hacer el register, 
+  ///pero si es false, es q se esta usando al cambiar el nombre de usuario
+  Future <void> cambiarNombre(String nombre, String token, bool automatico, [BuildContext? context]) async {
+    final _respuesta = await http.post(
+      urlUpdate,
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "idToken": token,
+        "displayName": nombre,
+        "returnSecureToken": true,
+      }),
+    );
+
+    if (!automatico){
+      if(_respuesta.statusCode==200){
+        print("Nombre cambiado");
+        ScaffoldMessenger.of(context!)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.aprobacion(
+              "Nombre actualizado",
+              "",
+            ),
+          );
+      }else{
+        print("Error al cambiar el nombre");
+        ScaffoldMessenger.of(context!)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "¡Error al cambiar de nombre!",
+              "Reinicia la app o vuelve a intentarlo mas tarde",
+            ),
+          );
+      }
     }
   }
 }
