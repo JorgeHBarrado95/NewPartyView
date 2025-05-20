@@ -37,6 +37,7 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
 
   Future<void> iniciarRender() async {
     await _localRenderer.initialize();
+    print('[ANFITRION] Renderer inicializado');
   }
 
   /// [seleccionarFuentePantalla] Esta funcion se encarga de seleccionar la fuente de la pantalla
@@ -119,13 +120,25 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
               }
       });
 
+      print('[ANFITRION] Captura iniciada. Video tracks: ${stream.getVideoTracks().length}');
+      if (stream.getVideoTracks().isNotEmpty) {
+        final t = stream.getVideoTracks()[0];
+        print('[ANFITRION] video track id: ${t.id}, enabled: ${t.enabled}, muted: ${t.muted}');
+      }
+
       stream.getVideoTracks()[0].onEnded = () {
         print('Captura de pantalla finalizada por el usuario.');
         _colgar();
       };
 
       _localStream = stream;
+      // Espera a que el renderer esté inicializado
+      if (_localRenderer.textureId != null) {
+        print('[ANFITRION] Renderer local ya inicializado');
+      }
+      await iniciarRender();
       _localRenderer.srcObject = _localStream;
+      print('[ANFITRION] Renderer local asignado.');
 
       // --- INTEGRACIÓN WEBRTC BROADCAST ---
       final salaProvider = Provider.of<SalaProvider>(context, listen: false);

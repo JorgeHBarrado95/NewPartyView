@@ -26,6 +26,7 @@ class _ReproduccionInvitadoState extends State<ReproduccionInvitado> {
         print('Invitado: No hay pistas de video en el stream remoto');
       }
       await _waitRendererInitialized();
+      if (!mounted) return;
       setState(() {
         _remoteRenderer.srcObject = stream;
         _connected = true;

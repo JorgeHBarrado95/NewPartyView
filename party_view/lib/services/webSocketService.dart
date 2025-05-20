@@ -16,9 +16,8 @@ class WebSocketServicio {
 
   WebSocketChannel? _channel;
 
-  //String _url = "ws://localhost:8080"; 
+  String _url = "ws://localhost:8080"; 
   //String _url ="ws://servidorsocket-r8mu.onrender.com";
-  String _url ="ws://192.168.0.15:8080";
 
   // --- WebRTC Signaling ---
   final Map<String, RTCPeerConnection> _peerConnections = {};
@@ -325,8 +324,14 @@ class WebSocketServicio {
     if (_localStream != null) {
       // Usar addTrack en vez de addStream para Unified Plan
       for (var track in _localStream!.getTracks()) {
+        print('[ANFITRION] Añadiendo track al peer $to: id=${track.id}, kind=${track.kind}, enabled=${track.enabled}, muted=${track.muted}');
         await pc.addTrack(track, _localStream!);
       }
+    } else {
+      print('[ANFITRION][ERROR] _localStream es null al crear la oferta para $to');
+    }
+    if (pc.connectionState == 'closed') {
+      print('[ANFITRION][ERROR] peerConnection $to está cerrado antes de crear la oferta');
     }
     pc.onIceCandidate = (candidate) {
       sendSignal(roomId: salaId, from: from, to: to, signalData: {'candidate': candidate.toMap()});
