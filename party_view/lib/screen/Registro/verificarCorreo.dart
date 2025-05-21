@@ -20,7 +20,7 @@ class VerificarCorreoScreen extends StatelessWidget {
                 ).createShader(bounds);
               },
               child: Text(
-                'Verifica tu correo',
+                "Verifica tu correo",
                 style: TextStyle(
                   fontSize: 40,
                   fontWeight: FontWeight.bold,

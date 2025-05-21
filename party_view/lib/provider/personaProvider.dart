@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:party_view/models/persona.dart';
 import 'package:party_view/services/loginService.dart';
 
+
 //COMO INICIALIZAR EL PROVIDER
 //final personaProvider = Provider.of<PersonaProvider>(
 //  context,
@@ -16,6 +17,7 @@ class PersonaProvider with ChangeNotifier {
 
   Persona? get getPersona => _persona;
   String get getNombre => _nombre;
+  String get getToken => _token;
   bool get esAnfitrion => _persona?.esAnfitrion ?? false;
 
   Future<void> setNombre(String nuevoNombre, BuildContext context) async {
@@ -39,7 +41,7 @@ class PersonaProvider with ChangeNotifier {
 
   Future<void> setFotoUrl(String url, BuildContext context) async {
     if (_persona != null) {
-      _persona!.fotoUrl = url;
+      _persona!.url = url;
       notifyListeners();
     }
     Loginservice _loginService = Loginservice();
@@ -47,10 +49,9 @@ class PersonaProvider with ChangeNotifier {
    
   }
 
-  Future<void> crearPersona(String nombre, String uid, String token) async {
-    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid); 
+  Future<void> crearPersona(String nombre, String uid, String token,String url) async {
+    _persona = Persona(nombre: nombre, esAnfitrion: false, uid: uid, url: url); 
     _token = token;
     print("persona creada");
   }
-
 }

@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/widget/cambiarNombre.dart';
 import 'package:party_view/widget/fotoPerfil.dart';
-import 'package:provider/provider.dart';
+
 
 class PerfilScreen extends StatelessWidget {
   @override

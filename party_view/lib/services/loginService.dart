@@ -7,13 +7,8 @@ import "package:party_view/provider/personaProvider.dart";
 import "package:party_view/widget/customSnackBar.dart";
 import "package:provider/provider.dart";
 
-
 /// Servicio que gestiona el registro y login de usuarios utilizando Firebase Authentication, enviando y recibiendo peticiones HTTP.
 class Loginservice {
-  // final PersonaProvider personaProvider;
-  // final BuildContext context;
-  // Loginservice(this.personaProvider,this.context);
-
   /// URL para registrar un nuevo usuario.
   final urlRegister = Uri.parse(
     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCR6r9ZgSdyXUYWmQOzATl2MQYW8EASsoE",
@@ -156,13 +151,14 @@ class Loginservice {
       print("Inicio de sesión exitoso");
 
       // Actualiza el displayName del usuario con el valor recibido del servidor.
-      final responseData = jsonDecode(_respuesta.body);
-      String _uid = responseData["localId"];
-      String _token = responseData["idToken"];
-      String _nombre = responseData["displayName"];
+      final respuestaData = jsonDecode(_respuesta.body);
+      String _uid = respuestaData["localId"];
+      String _token = respuestaData["idToken"];
+      String _nombre = respuestaData["displayName"] ?? "Usuario";
+      String _url = respuestaData["photoUrl"] ?? "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
 
       // Usa el provider inyectado.
-      await personaProvider.crearPersona(_nombre, _uid, _token); ///Se crea la persona y se almacena de manera local
+      await personaProvider.crearPersona(_nombre, _uid, _token,_url); ///Se crea la persona y se almacena de manera local
       _usuarioLogin.borrarDatos(); // Borra los datos del usuario
       return 0; // Inicio de sesión exitoso.
     } else {
@@ -210,7 +206,7 @@ class Loginservice {
     }
   }
 
-  Future <void> cambiarFoto(String url, String token, bool automatico, [BuildContext? context]) async {
+  Future <void> cambiarFoto(String url, String token, bool automatico, BuildContext context) async {
     final _respuesta = await http.post(
       urlUpdate,
       headers: {"Content-Type": "application/json"},
@@ -223,22 +219,22 @@ class Loginservice {
 
     if (!automatico){ 
       if(_respuesta.statusCode==200){
-        print("Nombre cambiado");
-        ScaffoldMessenger.of(context!)
+        print("Foto de perfil actualizada");
+        ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             CustomSnackbar.aprobacion(
-              "Nombre actualizado",
+              "Foto de perfil actualizada",
               "",
             ),
           );
       }else{
-        print("Error al cambiar el nombre");
-        ScaffoldMessenger.of(context!)
+        print("Error al cambiarde foto de perfil");
+        ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
             CustomSnackbar.error(
-              "¡Error al cambiar de nombre!",
+              "¡Error al cambiar de foto de perfil!",
               "Reinicia la app o vuelve a intentarlo mas tarde",
             ),
           );

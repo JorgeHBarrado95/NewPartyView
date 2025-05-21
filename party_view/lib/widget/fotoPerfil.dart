@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:party_view/provider/personaProvider.dart';
+import 'package:party_view/services/loginService.dart';
 import 'package:provider/provider.dart';
 
 class fotoPerfil extends StatelessWidget {
@@ -41,8 +42,8 @@ class fotoPerfil extends StatelessWidget {
                       spacing: 16,
                       runSpacing: 16,
                       children: imagenes.map((url) => GestureDetector(
-                        onTap: () {
-                          personaProvider.setFotoUrl(url, context);
+                        onTap: () async {
+                          await personaProvider.setFotoUrl(url, context);
                           Navigator.of(dialogContext).pop();
                         },
                         child: CircleAvatar(

@@ -128,6 +128,7 @@ class Registrovalidacion {
           );
         }
       } catch (e) {
+        print("Error en el registro");
         print(e);
       }
   }

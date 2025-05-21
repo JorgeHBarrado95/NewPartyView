@@ -18,7 +18,7 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => SalaProvider()),
-        ChangeNotifierProvider(create: (_) => PersonaProvider()),
+        ChangeNotifierProvider(create: (context) => PersonaProvider()),
       ],
       child: MyApp(),
     ),
