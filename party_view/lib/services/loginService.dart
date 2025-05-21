@@ -48,7 +48,6 @@ class Loginservice {
   
   late final String _token;
   Future<int> registro(UsuarioLogin _usuarioLogin, BuildContext context, PersonaProvider personaProvider) async {
-    //print(_usuarioLogin.toString());
     final _respuesta = await http.post(
       urlRegister,
       headers: {"Content-Type": "application/json"},
@@ -66,12 +65,6 @@ class Loginservice {
       String _uid = responseData["localId"];
       _token = responseData["idToken"];
 
-
-      final personaProvider = Provider.of<PersonaProvider>(
-      context,
-      listen: true,
-      );
-      //personaProvider.getPersona!.token=_token;
       personaProvider.setToken=_token;
 
       //Mandamos el correo de verificación
@@ -88,22 +81,12 @@ class Loginservice {
         await Future.delayed(Duration(seconds: 2));
       }
 
-      // //Actualiza el displayName
-      // final _respuesta2 = await http.post(
-      //   urlUpdate,
-      //   headers: {"Content-Type": "application/json"},
-      //   body: jsonEncode({
-      //     "idToken": _token,
-      //     "displayName": _usuarioLogin.nombre,
-      //     "returnSecureToken": true,
-      //   }),
-      // );
-
       //Actualiza el displayName
       cambiarNombre(_usuarioLogin.nombre!, _token, false);
       
       if (_respuesta.statusCode == 200) {
-        await personaProvider.crearPersona(_usuarioLogin.nombre ?? "usuario",_uid, _token); ///Se crea la persona y se almacena de manera local
+        String _url="https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024" ;
+        await personaProvider.crearPersona(_usuarioLogin.nombre ?? "usuario",_uid, _token, _url); ///Se crea la persona y se almacena de manera local
         _usuarioLogin.borrarDatos(); // Borra los datos del usuario
 
         return 0; // Registro exitoso.
@@ -165,9 +148,6 @@ class Loginservice {
         "returnSecureToken": true,
       }),
     );
-
-    //print("Response status: ${response.statusCode}");
-    //print("Response body: ${response.body}");
 
     if (_respuesta.statusCode == 400) {
       print("Error: Contraseña o correo incorrecto");
