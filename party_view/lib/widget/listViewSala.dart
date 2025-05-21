@@ -1,11 +1,10 @@
-
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
 import "package:party_view/provider/SalaProvider.dart";
 import "package:party_view/provider/personaProvider.dart";
 import "package:party_view/services/webSocketService.dart";
 import "package:provider/provider.dart";
-
+import "package:cached_network_image/cached_network_image.dart";
 
 class ListViewSala extends StatelessWidget {
   const ListViewSala({super.key, required this.salas});
@@ -19,15 +18,15 @@ class ListViewSala extends StatelessWidget {
       itemBuilder: (context, index) {
         final sala = salas[index];
         return Card(
-          margin: EdgeInsets.all(10), // Con las demás cards
+          margin: EdgeInsets.all(10),
           child: Container(
-            margin: EdgeInsets.all(10), // Con el borde del card
+            margin: EdgeInsets.all(10),
             child: Column(
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    child: Text(sala.anfitrion.nombre[0]),
-                  ), // Primera letra del nombre del anfitrión
+                    backgroundImage: CachedNetworkImageProvider(sala.anfitrion.url),
+                  ), // Foto de perfil del anfitrión con caché
                   title: Text("Sala: #${sala.id}"),
                   subtitle: Text(
                     "Capacidad max: ${sala.capacidad}, Estado: ${sala.estado}",

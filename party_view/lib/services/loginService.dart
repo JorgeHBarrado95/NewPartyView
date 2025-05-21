@@ -133,39 +133,49 @@ class Loginservice {
   /// - `0` si el inicio de sesión fue exitoso.
   /// - `1` si hay un error en la contraseña o correo electrónico.
   /// - `2` si ocurrió un error desconocido.
-  Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) async {
-    final _respuesta = await http.post(
-      urlLogin,
+Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) async {
+  final _respuesta = await http.post(
+    urlLogin,
+    headers: {"Content-Type": "application/json"},
+    body: jsonEncode({
+      "email": _usuarioLogin.correo,
+      "password": _usuarioLogin.contrasena,
+      "returnSecureToken": true,
+    }),
+  );
+
+  if (_respuesta.statusCode == 400) {
+    print("Error: Contraseña o correo incorrecto");
+    return 1;
+  } else if (_respuesta.statusCode == 200) {
+    print("Inicio de sesión exitoso");
+
+    final respuestaData = jsonDecode(_respuesta.body);
+    String _uid = respuestaData["localId"];
+    String _token = respuestaData["idToken"];
+
+    final responseLookup = await http.post(
+      urlNombre,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "email": _usuarioLogin.correo,
-        "password": _usuarioLogin.contrasena,
-        "returnSecureToken": true,
-      }),
+      body: jsonEncode({"idToken": _token}),
     );
 
-    if (_respuesta.statusCode == 400) {
-      print("Error: Contraseña o correo incorrecto");
-      return 1; // Error en la contraseña o correo electrónico.
-    } else if (_respuesta.statusCode == 200) {
-      print("Inicio de sesión exitoso");
+    final _datosUsuario = jsonDecode(responseLookup.body);
+    final _usuario = _datosUsuario["users"][0];
 
-      // Actualiza el displayName del usuario con el valor recibido del servidor.
-      final respuestaData = jsonDecode(_respuesta.body);
-      String _uid = respuestaData["localId"];
-      String _token = respuestaData["idToken"];
-      String _nombre = respuestaData["displayName"] ?? "Usuario";
-      String _url = respuestaData["photoUrl"] ?? "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
+    String _nombre = _usuario["displayName"] ?? "Usuario";
+    String _url = _usuario["photoUrl"] ??
+        "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
 
-      // Usa el provider inyectado.
-      await personaProvider.crearPersona(_nombre, _uid, _token,_url); ///Se crea la persona y se almacena de manera local
-      _usuarioLogin.borrarDatos(); // Borra los datos del usuario
-      return 0; // Inicio de sesión exitoso.
-    } else {
-      print("Error desconocido");
-      return 2; // Error desconocido.
-    }
+    await personaProvider.crearPersona(_nombre, _uid, _token, _url);
+    _usuarioLogin.borrarDatos();
+    return 0;
+  } else {
+    print("Error desconocido");
+    return 2;
   }
+}
+
   
   //Actualiza el displayName
   ///[automatico] Si es true, es q el metodo se esta usando al hacer el register, 
@@ -207,6 +217,8 @@ class Loginservice {
   }
 
   Future <void> cambiarFoto(String url, String token, bool automatico, BuildContext context) async {
+    print("URL: $url");
+    print("TOKEN: $token");
     final _respuesta = await http.post(
       urlUpdate,
       headers: {"Content-Type": "application/json"},
@@ -216,6 +228,8 @@ class Loginservice {
         "returnSecureToken": true,
       }),
     );
+
+    print(_respuesta.body);
 
     if (!automatico){ 
       if(_respuesta.statusCode==200){

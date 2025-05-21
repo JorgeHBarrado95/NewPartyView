@@ -40,10 +40,9 @@ class PersonaProvider with ChangeNotifier {
   }
 
   Future<void> setFotoUrl(String url, BuildContext context) async {
-    if (_persona != null) {
-      _persona!.url = url;
-      notifyListeners();
-    }
+    _persona!.url = url;
+    notifyListeners();
+
     Loginservice _loginService = Loginservice();
     await _loginService.cambiarFoto(url, _token,false,context);
    
