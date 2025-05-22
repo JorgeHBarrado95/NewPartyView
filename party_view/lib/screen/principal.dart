@@ -32,7 +32,7 @@ class _PrincipalState extends State<Principal> {
 
   void _filtrarSalas(String value, List<Sala> todasLasSalas) {
     setState(() {
-      _busqueda = value;
+      _busqueda = value.replaceAll('#', '');
       if (_busqueda.isEmpty) {
         _salasFiltradas = todasLasSalas;
       } else {
