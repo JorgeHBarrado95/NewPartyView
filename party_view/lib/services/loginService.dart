@@ -9,6 +9,10 @@ import "package:provider/provider.dart";
 
 /// Servicio que gestiona el registro y login de usuarios utilizando Firebase Authentication, enviando y recibiendo peticiones HTTP.
 class Loginservice {
+  // final PersonaProvider personaProvider;
+  // final BuildContext context;
+  // Loginservice(this.personaProvider,this.context);
+
   /// URL para registrar un nuevo usuario.
   final urlRegister = Uri.parse(
     "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyCR6r9ZgSdyXUYWmQOzATl2MQYW8EASsoE",
@@ -25,7 +29,7 @@ class Loginservice {
   );
 
   /// URL para obtener información del usuario, como el nombre de usuario.
-  final urlNombre = Uri.parse(
+  final urlUsuario = Uri.parse(
     "https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyCR6r9ZgSdyXUYWmQOzATl2MQYW8EASsoE",
   );
 
@@ -43,6 +47,7 @@ class Loginservice {
   
   late final String _token;
   Future<int> registro(UsuarioLogin _usuarioLogin, BuildContext context, PersonaProvider personaProvider) async {
+    //print(_usuarioLogin.toString());
     final _respuesta = await http.post(
       urlRegister,
       headers: {"Content-Type": "application/json"},
@@ -60,6 +65,12 @@ class Loginservice {
       String _uid = responseData["localId"];
       _token = responseData["idToken"];
 
+
+      final personaProvider = Provider.of<PersonaProvider>(
+      context,
+      listen: true,
+      );
+      //personaProvider.getPersona!.token=_token;
       personaProvider.setToken=_token;
 
       //Mandamos el correo de verificación
@@ -75,6 +86,17 @@ class Loginservice {
         _verificado=await comprobarVerificacion();
         await Future.delayed(Duration(seconds: 2));
       }
+
+      // //Actualiza el displayName
+      // final _respuesta2 = await http.post(
+      //   urlUpdate,
+      //   headers: {"Content-Type": "application/json"},
+      //   body: jsonEncode({
+      //     "idToken": _token,
+      //     "displayName": _usuarioLogin.nombre,
+      //     "returnSecureToken": true,
+      //   }),
+      // );
 
       //Actualiza el displayName
       cambiarNombre(_usuarioLogin.nombre!, _token, false);
@@ -109,7 +131,7 @@ class Loginservice {
 
   Future <bool> comprobarVerificacion() async {
     final _response = await http.post(
-      urlNombre,
+      urlUsuario,
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({
         "idToken": _token,
@@ -133,49 +155,53 @@ class Loginservice {
   /// - `0` si el inicio de sesión fue exitoso.
   /// - `1` si hay un error en la contraseña o correo electrónico.
   /// - `2` si ocurrió un error desconocido.
-Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) async {
-  final _respuesta = await http.post(
-    urlLogin,
-    headers: {"Content-Type": "application/json"},
-    body: jsonEncode({
-      "email": _usuarioLogin.correo,
-      "password": _usuarioLogin.contrasena,
-      "returnSecureToken": true,
-    }),
-  );
-
-  if (_respuesta.statusCode == 400) {
-    print("Error: Contraseña o correo incorrecto");
-    return 1;
-  } else if (_respuesta.statusCode == 200) {
-    print("Inicio de sesión exitoso");
-
-    final respuestaData = jsonDecode(_respuesta.body);
-    String _uid = respuestaData["localId"];
-    String _token = respuestaData["idToken"];
-
-    final responseLookup = await http.post(
-      urlNombre,
+  /// - `4` si el correo electrónico no ha sido verificado.
+  Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) async {
+    final _respuesta = await http.post(
+      urlLogin,
       headers: {"Content-Type": "application/json"},
-      body: jsonEncode({"idToken": _token}),
+      body: jsonEncode({
+        "email": _usuarioLogin.correo,
+        "password": _usuarioLogin.contrasena,
+        "returnSecureToken": true,
+      }),
     );
 
-    final _datosUsuario = jsonDecode(responseLookup.body);
-    final _usuario = _datosUsuario["users"][0];
+    if (_respuesta.statusCode == 400) {
+      print("Error: Contraseña o correo incorrecto");
+      return 1; // Error en la contraseña o correo electrónico.
+    } else if (_respuesta.statusCode == 200) {
+      print("Inicio de sesión exitoso");
+      final respuestaData = jsonDecode(_respuesta.body);
+      String _uid = respuestaData["localId"];
+      String _token = respuestaData["idToken"];
 
-    String _nombre = _usuario["displayName"] ?? "Usuario";
-    String _url = _usuario["photoUrl"] ??
-        "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
+      // Comprobar verificación de correo con accounts:lookup
+      final responseLookup = await http.post(
+        urlUsuario,
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"idToken": _token}),
+      );
+      final _datosUsuario = jsonDecode(responseLookup.body);
+      final _usuario = _datosUsuario["users"][0];
 
-    await personaProvider.crearPersona(_nombre, _uid, _token, _url);
-    _usuarioLogin.borrarDatos();
-    return 0;
-  } else {
-    print("Error desconocido");
-    return 2;
+      bool _verificado = _usuario["emailVerified"];
+
+      if (!_verificado) {
+        print("El correo no ha sido verificado");
+        return 4; // Correo no verificado
+      }
+
+      String _nombre = _usuario["displayName"] ?? "Usuario";
+      String _url = _usuario["photoUrl"] ?? "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
+      await personaProvider.crearPersona(_nombre, _uid, _token, _url);
+      _usuarioLogin.borrarDatos();
+      return 0; // Inicio de sesión exitoso.
+    } else {
+      print("Error desconocido");
+      return 2; // Error desconocido.
+    }
   }
-}
-
   
   //Actualiza el displayName
   ///[automatico] Si es true, es q el metodo se esta usando al hacer el register, 
@@ -217,8 +243,6 @@ Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) a
   }
 
   Future <void> cambiarFoto(String url, String token, bool automatico, BuildContext context) async {
-    print("URL: $url");
-    print("TOKEN: $token");
     final _respuesta = await http.post(
       urlUpdate,
       headers: {"Content-Type": "application/json"},
@@ -228,8 +252,6 @@ Future<int> login(UsuarioLogin _usuarioLogin, PersonaProvider personaProvider) a
         "returnSecureToken": true,
       }),
     );
-
-    print(_respuesta.body);
 
     if (!automatico){ 
       if(_respuesta.statusCode==200){

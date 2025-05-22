@@ -8,8 +8,8 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //PRUEBA
-    campoEmail.text = "12@gmail.com";
-    campoContrasena.text = "123456";
+    // campoEmail.text = "12@gmail.com";
+    // campoContrasena.text = "123456";
     
     final LoginValidacion _loginValidacion = LoginValidacion();
     return Scaffold(

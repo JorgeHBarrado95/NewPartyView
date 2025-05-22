@@ -10,10 +10,10 @@ class RegistroScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //PRUEBA
-    campoNombre.text = "Sergio";
-    campoEmail.text = "jorgehbarrado@gmail.com";
-    campoContrasena.text = "123456";
-    campoConfirmarContrasena.text = "123456";
+    // campoNombre.text = "Sergio";
+    // campoEmail.text = "jorgehbarrado@gmail.com";
+    // campoContrasena.text = "123456";
+    // campoConfirmarContrasena.text = "123456";
 
     Registrovalidacion _registroValidacion = Registrovalidacion();
     return Scaffold(

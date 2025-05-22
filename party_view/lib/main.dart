@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:party_view/provider/personaProvider.dart';
@@ -12,8 +14,15 @@ import 'package:party_view/screen/salaEspera.dart';
 
 
 import 'package:provider/provider.dart';
+import 'package:window_size/window_size.dart';
 
 void main() {
+    WidgetsFlutterBinding.ensureInitialized();
+    if (Platform.isWindows || Platform.isLinux) {
+      setWindowTitle('Party View');
+      setWindowMinSize(const Size(1280, 730)); 
+      setWindowMaxSize(const Size(1280, 730)); 
+    }
   runApp(
     MultiProvider(
       providers: [

@@ -67,7 +67,18 @@ class LoginValidacion {
         print("Error en la contraseña o @");
 
         return;
-      } else {
+      } else if(estadoLogin == 3) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(
+            CustomSnackbar.error(
+              "❗¡El correo no ha sido verificado!",
+              "Por favor verifica tu correo",
+            ),
+          );
+        print("El correo no ha sido verificado");
+        return;
+      }else {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(
