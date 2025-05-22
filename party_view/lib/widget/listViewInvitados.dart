@@ -31,8 +31,9 @@ class ListViewInvitados extends StatelessWidget {
               children: [
                 ListTile(
                   leading: CircleAvatar(
-                    backgroundImage: CachedNetworkImageProvider(invitado.url[0]),
+                    backgroundImage: CachedNetworkImageProvider(invitado.url),
                   ),
+                  
                   title: Text("Nombre: ${invitado.nombre}"),
                   trailing:
                       esAnfitrion
