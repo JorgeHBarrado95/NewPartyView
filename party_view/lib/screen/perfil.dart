@@ -101,11 +101,49 @@ class PerfilScreen extends StatelessWidget {
                                 ),
                               ),
                             ),
+                            Positioned(
+                              top: 24,
+                              left: 0,
+                              right: 0,
+                              child: Center(
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.deepPurple.withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: const Text(
+                                    "Personalización del perfil",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 22,
+                                      letterSpacing: 1.2,
+                                      shadows: [
+                                        Shadow(
+                                          blurRadius: 6,
+                                          color: Colors.black26,
+                                          offset: Offset(1, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ),
+                            ),
                             Center(
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const SizedBox(height: 32),
+                                  const SizedBox(height: 64),
                                   Container(
                                     padding: const EdgeInsets.all(20),
                                     decoration: BoxDecoration(
