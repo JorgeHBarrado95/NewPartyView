@@ -67,7 +67,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                       builder: (context, constraints) {
                         double maxWidth = constraints.maxWidth;
                         double maxHeight = constraints.maxHeight;
-                        double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); // Más ancho
+                        double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); 
                         double containerHeight = (maxHeight * 0.8).clamp(400.0, 700.0);
                         return Center(
                           child: AnimatedContainer(

@@ -15,11 +15,30 @@ class Principal extends StatefulWidget {
 
 class _PrincipalState extends State<Principal> {
   late Future<List<Sala>> _futureSalas;
+  List<Sala> _salasFiltradas = [];
+  String _busqueda = "";
+  final TextEditingController _buscadorController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _futureSalas = GestorSalasService().getSalas();
+    _futureSalas.then((salas) {
+      setState(() {
+        _salasFiltradas = salas;
+      });
+    });
+  }
+
+  void _filtrarSalas(String value, List<Sala> todasLasSalas) {
+    setState(() {
+      _busqueda = value;
+      if (_busqueda.isEmpty) {
+        _salasFiltradas = todasLasSalas;
+      } else {
+        _salasFiltradas = todasLasSalas.where((sala) => sala.id.toString().contains(_busqueda)).toList();
+      }
+    });
   }
 
   @override
@@ -103,6 +122,11 @@ class _PrincipalState extends State<Principal> {
                                     children: [
                                       Expanded(
                                         child: TextField(
+                                          controller: _buscadorController,
+                                          onChanged: (value) async {
+                                            final todasLasSalas = await _futureSalas;
+                                            _filtrarSalas(value, todasLasSalas);
+                                          },
                                           decoration: InputDecoration(
                                             prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
                                             hintText: "Buscador de sala",
@@ -154,17 +178,6 @@ class _PrincipalState extends State<Principal> {
                                       builder: (context, snapshot) {
                                         if (snapshot.connectionState == ConnectionState.waiting) {
                                           return Center(child: CircularProgressIndicator(color: Colors.deepPurple));
-                                        } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                                          return Center(
-                                            child: Text(
-                                              "No hay salas disponibles",
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          );
                                         } else if (snapshot.hasError) {
                                           return Center(
                                             child: Text(
@@ -177,7 +190,21 @@ class _PrincipalState extends State<Principal> {
                                             ),
                                           );
                                         } else {
-                                          return ListViewSala(salas: snapshot.data!);
+                                          final todasLasSalas = snapshot.data ?? [];
+                                          final salasAMostrar = _busqueda.isEmpty ? todasLasSalas : _salasFiltradas;
+                                          if (salasAMostrar.isEmpty) {
+                                            return Center(
+                                              child: Text(
+                                                "No hay salas disponibles",
+                                                style: TextStyle(
+                                                  fontSize: 20,
+                                                  color: Colors.white,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                          return ListViewSala(salas: salasAMostrar);
                                         }
                                       },
                                     ),
