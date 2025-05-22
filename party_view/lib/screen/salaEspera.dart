@@ -20,195 +20,205 @@ class _SalaEsperaState extends State<SalaEspera> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F8EE),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SizedBox(height: 32),
-            ShaderMask(
-              shaderCallback: (Rect bounds) {
-                return const LinearGradient(
-                  colors: [Colors.purpleAccent, Colors.deepPurple, Colors.teal],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ).createShader(bounds);
-              },
-              child: const Text(
-                "Sala de Espera",
-                style: TextStyle(
-                  fontSize: 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                  letterSpacing: 2,
-                  shadows: [
-                    Shadow(
-                      blurRadius: 12,
-                      color: Colors.black26,
-                      offset: Offset(2, 4),
-                    ),
-                  ],
-                ),
-                textAlign: TextAlign.center,
-              ),
+      body: Stack(
+        children: [
+          SizedBox.expand(
+            child: Image.asset(
+              'assets/fondodos.jpg',
+              fit: BoxFit.cover,
             ),
-            const SizedBox(height: 24),
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    double maxWidth = constraints.maxWidth;
-                    double maxHeight = constraints.maxHeight;
-                    double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); // Más ancho
-                    double containerHeight = (maxHeight * 0.8).clamp(400.0, 700.0);
-                    return Center(
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 400),
-                        curve: Curves.easeInOut,
-                        width: containerWidth,
-                        height: containerHeight,
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF319EA1), Color(0xFF6DD5ED)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                          borderRadius: BorderRadius.circular(28),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black26,
-                              blurRadius: 18,
-                              offset: Offset(0, 8),
-                            ),
-                          ],
+          ),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 32),
+                ShaderMask(
+                  shaderCallback: (Rect bounds) {
+                    return const LinearGradient(
+                      colors: [Colors.purpleAccent, Colors.deepPurple, Colors.teal],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ).createShader(bounds);
+                  },
+                  child: const Text(
+                    "Sala de Espera",
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      letterSpacing: 2,
+                      shadows: [
+                        Shadow(
+                          blurRadius: 12,
+                          color: Colors.black26,
+                          offset: Offset(2, 4),
                         ),
-                        child: SingleChildScrollView(
-                          child: Padding(
-                            padding: const EdgeInsets.all(24.0),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                // Información de la sala
-                                Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
-                                  decoration: BoxDecoration(
-                                    color: const Color.fromARGB(255, 157, 124, 212).withOpacity(0.85),
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black26,
-                                        blurRadius: 8,
-                                        offset: Offset(0, 4),
-                                      ),
-                                    ],
-                                  ),
-                                  child: salaProvider.sala != null
-                                      ? Column(
-                                          children: [
-                                            Text(
-                                              "Sala: #${salaProvider.sala!.id}",
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 20,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                Text(
-                                                  "Capacidad: ${salaProvider.sala!.capacidad}",
-                                                  style: const TextStyle(
-                                                    color: Colors.white,
-                                                    fontSize: 16,
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 10),
-                                                if (esAnfitrion)
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      salaProvider.incrementarCapacidad();
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                      shape: const CircleBorder(),
-                                                      padding: const EdgeInsets.all(10),
-                                                      backgroundColor: Colors.white,
-                                                      foregroundColor: Colors.deepPurple,
-                                                    ),
-                                                    child: const Icon(Icons.add, size: 20),
-                                                  ),
-                                                if (esAnfitrion)
-                                                  ElevatedButton(
-                                                    onPressed: () {
-                                                      salaProvider.disminuirCapacidad();
-                                                    },
-                                                    style: ElevatedButton.styleFrom(
-                                                      shape: const CircleBorder(),
-                                                      padding: const EdgeInsets.all(10),
-                                                      backgroundColor: Colors.white,
-                                                      foregroundColor: Colors.deepPurple,
-                                                    ),
-                                                    child: const Icon(Icons.remove, size: 20),
-                                                  ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                const Text(
-                                                  "Estado: ",
-                                                  style: TextStyle(color: Colors.white, fontSize: 16),
-                                                ),
-                                                salaProvider.sala != null && esAnfitrion
-                                                    ? DropdownButton<String>(
-                                                        dropdownColor: Colors.white,
-                                                        value: salaProvider.sala!.estado,
-                                                        style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16),
-                                                        items: ["Abierto", "Cerrado"].map((String estado) {
-                                                          return DropdownMenuItem<String>(
-                                                            value: estado,
-                                                            child: Text(estado, style: const TextStyle(color: Colors.deepPurple)),
-                                                          );
-                                                        }).toList(),
-                                                        onChanged: (String? newValue) {
-                                                          if (newValue != null) {
-                                                            salaProvider.estado(newValue);
-                                                          }
-                                                        },
-                                                      )
-                                                    : Text(
-                                                        salaProvider.sala!.estado,
-                                                        style: const TextStyle(color: Colors.white, fontSize: 16),
-                                                      ),
-                                              ],
-                                            ),
-                                          ],
-                                        )
-                                      : const Text(
-                                          "Cargando sala...",
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                ),
-                                const SizedBox(height: 24),
-                                // Lista de invitados
-                                SizedBox(
-                                  height: 220,
-                                  child: ListaInvitados(esAnfitrion: esAnfitrion),
+                      ],
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        double maxWidth = constraints.maxWidth;
+                        double maxHeight = constraints.maxHeight;
+                        double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); // Más ancho
+                        double containerHeight = (maxHeight * 0.8).clamp(400.0, 700.0);
+                        return Center(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            width: containerWidth,
+                            height: containerHeight,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [Color(0xFF319EA1), Color(0xFF6DD5ED)],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(28),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black26,
+                                  blurRadius: 18,
+                                  offset: Offset(0, 8),
                                 ),
                               ],
                             ),
+                            child: SingleChildScrollView(
+                              child: Padding(
+                                padding: const EdgeInsets.all(24.0),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    // Información de la sala
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                                      decoration: BoxDecoration(
+                                        color: const Color.fromARGB(255, 157, 124, 212).withOpacity(0.85),
+                                        borderRadius: BorderRadius.circular(12),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black26,
+                                            blurRadius: 8,
+                                            offset: Offset(0, 4),
+                                          ),
+                                        ],
+                                      ),
+                                      child: salaProvider.sala != null
+                                          ? Column(
+                                              children: [
+                                                Text(
+                                                  "Sala: #${salaProvider.sala!.id}",
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      "Capacidad: ${salaProvider.sala!.capacidad}",
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 10),
+                                                    if (esAnfitrion)
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          salaProvider.incrementarCapacidad();
+                                                        },
+                                                        style: ElevatedButton.styleFrom(
+                                                          shape: const CircleBorder(),
+                                                          padding: const EdgeInsets.all(10),
+                                                          backgroundColor: Colors.white,
+                                                          foregroundColor: Colors.deepPurple,
+                                                        ),
+                                                        child: const Icon(Icons.add, size: 20),
+                                                      ),
+                                                    if (esAnfitrion)
+                                                      ElevatedButton(
+                                                        onPressed: () {
+                                                          salaProvider.disminuirCapacidad();
+                                                        },
+                                                        style: ElevatedButton.styleFrom(
+                                                          shape: const CircleBorder(),
+                                                          padding: const EdgeInsets.all(10),
+                                                          backgroundColor: Colors.white,
+                                                          foregroundColor: Colors.deepPurple,
+                                                        ),
+                                                        child: const Icon(Icons.remove, size: 20),
+                                                      ),
+                                                  ],
+                                                ),
+                                                const SizedBox(height: 6),
+                                                Row(
+                                                  mainAxisAlignment: MainAxisAlignment.center,
+                                                  children: [
+                                                    const Text(
+                                                      "Estado: ",
+                                                      style: TextStyle(color: Colors.white, fontSize: 16),
+                                                    ),
+                                                    salaProvider.sala != null && esAnfitrion
+                                                        ? DropdownButton<String>(
+                                                            dropdownColor: Colors.white,
+                                                            value: salaProvider.sala!.estado,
+                                                            style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16),
+                                                            items: ["Abierto", "Cerrado"].map((String estado) {
+                                                              return DropdownMenuItem<String>(
+                                                                value: estado,
+                                                                child: Text(estado, style: const TextStyle(color: Colors.deepPurple)),
+                                                              );
+                                                            }).toList(),
+                                                            onChanged: (String? newValue) {
+                                                              if (newValue != null) {
+                                                                salaProvider.estado(newValue);
+                                                              }
+                                                            },
+                                                          )
+                                                        : Text(
+                                                            salaProvider.sala!.estado,
+                                                            style: const TextStyle(color: Colors.white, fontSize: 16),
+                                                          ),
+                                                  ],
+                                                ),
+                                              ],
+                                            )
+                                          : const Text(
+                                              "Cargando sala...",
+                                              style: TextStyle(color: Colors.white),
+                                            ),
+                                    ),
+                                    const SizedBox(height: 24),
+                                    // Lista de invitados
+                                    SizedBox(
+                                      height: 220,
+                                      child: ListaInvitados(esAnfitrion: esAnfitrion),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    );
-                  },
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,

@@ -82,6 +82,8 @@ flutter:
     - assets/sounds/
     - assets/sounds/error.mp3
     - assets/sounds/pop.mp3
+    - assets/fondouno.jpg
+    - assets/fondodos.jpg
 
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
