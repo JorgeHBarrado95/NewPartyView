@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/webSocketService.dart';
 import 'package:party_view/widget/listViewInvitados.dart';
 import 'package:provider/provider.dart';
-
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -15,53 +12,230 @@ class SalaEspera extends StatefulWidget {
 }
 
 class _SalaEsperaState extends State<SalaEspera> {
-
-
   @override
   Widget build(BuildContext context) {
-    final personaProvider = Provider.of<PersonaProvider>(
-      context,
-      listen: true,
-    );
-    final salaProvider = Provider.of<SalaProvider>(
-      context,
-      listen: true,
-    );
+    final personaProvider = Provider.of<PersonaProvider>(context, listen: true);
+    final salaProvider = Provider.of<SalaProvider>(context, listen: true);
+    final bool esAnfitrion = personaProvider.getPersona!.esAnfitrion;
 
-    ///Boton de salida
     return Scaffold(
-      body: Body(
-        esAnfitrion: personaProvider.getPersona!.esAnfitrion,
+      backgroundColor: const Color(0xFFF5F8EE),
+      body: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 32),
+            ShaderMask(
+              shaderCallback: (Rect bounds) {
+                return const LinearGradient(
+                  colors: [Colors.purpleAccent, Colors.deepPurple, Colors.teal],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ).createShader(bounds);
+              },
+              child: const Text(
+                "Sala de Espera",
+                style: TextStyle(
+                  fontSize: 40,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: 2,
+                  shadows: [
+                    Shadow(
+                      blurRadius: 12,
+                      color: Colors.black26,
+                      offset: Offset(2, 4),
+                    ),
+                  ],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    double maxWidth = constraints.maxWidth;
+                    double maxHeight = constraints.maxHeight;
+                    double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); // Más ancho
+                    double containerHeight = (maxHeight * 0.8).clamp(400.0, 700.0);
+                    return Center(
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 400),
+                        curve: Curves.easeInOut,
+                        width: containerWidth,
+                        height: containerHeight,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF319EA1), Color(0xFF6DD5ED)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(28),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Colors.black26,
+                              blurRadius: 18,
+                              offset: Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        child: SingleChildScrollView(
+                          child: Padding(
+                            padding: const EdgeInsets.all(24.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Información de la sala
+                                Container(
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
+                                  decoration: BoxDecoration(
+                                    color: const Color.fromARGB(255, 157, 124, 212).withOpacity(0.85),
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.black26,
+                                        blurRadius: 8,
+                                        offset: Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: salaProvider.sala != null
+                                      ? Column(
+                                          children: [
+                                            Text(
+                                              "Sala: #${salaProvider.sala!.id}",
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  "Capacidad: ${salaProvider.sala!.capacidad}",
+                                                  style: const TextStyle(
+                                                    color: Colors.white,
+                                                    fontSize: 16,
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                if (esAnfitrion)
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      salaProvider.incrementarCapacidad();
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      shape: const CircleBorder(),
+                                                      padding: const EdgeInsets.all(10),
+                                                      backgroundColor: Colors.white,
+                                                      foregroundColor: Colors.deepPurple,
+                                                    ),
+                                                    child: const Icon(Icons.add, size: 20),
+                                                  ),
+                                                if (esAnfitrion)
+                                                  ElevatedButton(
+                                                    onPressed: () {
+                                                      salaProvider.disminuirCapacidad();
+                                                    },
+                                                    style: ElevatedButton.styleFrom(
+                                                      shape: const CircleBorder(),
+                                                      padding: const EdgeInsets.all(10),
+                                                      backgroundColor: Colors.white,
+                                                      foregroundColor: Colors.deepPurple,
+                                                    ),
+                                                    child: const Icon(Icons.remove, size: 20),
+                                                  ),
+                                              ],
+                                            ),
+                                            const SizedBox(height: 6),
+                                            Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: [
+                                                const Text(
+                                                  "Estado: ",
+                                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                                ),
+                                                salaProvider.sala != null && esAnfitrion
+                                                    ? DropdownButton<String>(
+                                                        dropdownColor: Colors.white,
+                                                        value: salaProvider.sala!.estado,
+                                                        style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0), fontSize: 16),
+                                                        items: ["Abierto", "Cerrado"].map((String estado) {
+                                                          return DropdownMenuItem<String>(
+                                                            value: estado,
+                                                            child: Text(estado, style: const TextStyle(color: Colors.deepPurple)),
+                                                          );
+                                                        }).toList(),
+                                                        onChanged: (String? newValue) {
+                                                          if (newValue != null) {
+                                                            salaProvider.estado(newValue);
+                                                          }
+                                                        },
+                                                      )
+                                                    : Text(
+                                                        salaProvider.sala!.estado,
+                                                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                                                      ),
+                                              ],
+                                            ),
+                                          ],
+                                        )
+                                      : const Text(
+                                          "Cargando sala...",
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                ),
+                                const SizedBox(height: 24),
+                                // Lista de invitados
+                                SizedBox(
+                                  height: 220,
+                                  child: ListaInvitados(esAnfitrion: esAnfitrion),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           FloatingActionButton(
             heroTag: "btn1",
+            backgroundColor: Colors.white,
             onPressed: () {
               WebSocketServicio _webSocketServicio = WebSocketServicio();
               _webSocketServicio.abandonarSala(salaProvider.sala!.id, personaProvider.getPersona!.uid);
               Navigator.pop(context);
             },
-            child: Icon(Icons.arrow_back),
+            child: const Icon(Icons.arrow_back, color: Colors.deepPurple),
           ),
-          SizedBox(height: 10),
-          if (personaProvider.getPersona!.esAnfitrion)
+          const SizedBox(height: 10),
+          if (esAnfitrion)
             FloatingActionButton(
               heroTag: "btn2",
+              backgroundColor: Colors.white,
               onPressed: () {
-                final salaProvider = Provider.of<SalaProvider>(
-                  context,
-                  listen: false,
-                );
+                final salaProvider = Provider.of<SalaProvider>(context, listen: false);
                 WebSocketServicio _webSocketServicio = WebSocketServicio();
                 _webSocketServicio.video(salaProvider.sala!.id);
-                Navigator.pushNamed(
-                  context,
-                  "/reproduccion",
-                );
+                Navigator.pushNamed(context, "/reproduccion");
               },
-              child: Icon(Icons.play_arrow),
+              child: const Icon(Icons.play_arrow, color: Colors.purpleAccent),
             ),
         ],
       ),
@@ -69,158 +243,19 @@ class _SalaEsperaState extends State<SalaEspera> {
   }
 }
 
-class Body extends StatelessWidget {
-  const Body({super.key, required this.esAnfitrion});
-
-  final bool esAnfitrion;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        child: Column(
-          children: [
-            MenuArriba(esAnfitrion: esAnfitrion),
-            SizedBox(height: 20),
-            ListaInvitados(esAnfitrion: esAnfitrion)
-          ],
-        ),
-        padding: EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black26,
-              blurRadius: 10,
-              offset: Offset(0, 5),
-            ),
-          ],
-        ),
-        margin: EdgeInsets.all(30),
-      ),
-    );
-  }
-}
-
-///List View de los invitados.
 class ListaInvitados extends StatelessWidget {
   const ListaInvitados({super.key, required this.esAnfitrion});
-
   final bool esAnfitrion;
-
   @override
   Widget build(BuildContext context) {
     final _salaProvider = Provider.of<SalaProvider>(context, listen: true);
-    final invitados =
-        _salaProvider.sala?.invitados ?? []; //Si esta vacío el array, devuelve una lista vacía.
-
+    final invitados = _salaProvider.sala?.invitados ?? [];
     if (invitados.isEmpty) {
       return Center(child: Text("No hay invitados disponibles"));
     }
-
-    return Expanded(
-      child: ListViewInvitados(
-        invitados: invitados,
-        esAnfitrion: esAnfitrion,
-      ),
-    );
-  }
-}
-
-///El [menuArriba] es el menu de la parte superior de la pantalla donde aparece el id, la capacidad y el estado de la sala.
-class MenuArriba extends StatefulWidget {
-  const MenuArriba({super.key, required this.esAnfitrion});
-
-  final bool esAnfitrion;
-
-  @override
-  _MenuArribaState createState() => _MenuArribaState();
-}
-
-class _MenuArribaState extends State<MenuArriba> {
-  final List<String> _estados = ["Abierto", "Cerrado"];
-
-  @override
-  Widget build(BuildContext context) {
-    final _salaProvider = Provider.of<SalaProvider>(context, listen: true);
-    final sala = _salaProvider.sala;
-    final String? estadoActual = sala?.estado;
-
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _salaProvider.sala != null ? "Sala: #${_salaProvider.sala!.id}" : "Cargando sala...",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              SizedBox(width: 15),
-              Row(
-                children: [
-                  Text(() {
-                    try {
-                      return "Capacidad: ${_salaProvider.sala!.capacidad}";
-                    } catch (e) {
-                      return "Capacidad no disponible";
-                    }
-                  }(), style: TextStyle(fontSize: 16)),
-                  SizedBox(width: 10),
-                  if (widget.esAnfitrion) //Se pone widget para acceder a la variable de la clase padre
-                    ElevatedButton(
-                      onPressed: () {
-                        _salaProvider.incrementarCapacidad();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: CircleBorder(),
-                        padding: EdgeInsets.all(10),
-                      ),
-                      child: Icon(Icons.add, size: 20),
-                    ),
-                  if (widget.esAnfitrion)
-                    ElevatedButton(
-                      onPressed: () {
-                        _salaProvider.disminuirCapacidad();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        shape: CircleBorder(),
-                        padding: EdgeInsets.all(10),
-                      ),
-                      child: Icon(Icons.remove, size: 20),
-                    ),
-                ],
-              ),
-            ],
-          ),
-          SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text("Estado de la sala:", style: TextStyle(fontSize: 16)),
-              SizedBox(width: 15),
-              DropdownButton<String>(
-                value: estadoActual ?? _estados.first,
-                items: _estados.map((String estado) {
-                  return DropdownMenuItem<String>(
-                    value: estado,
-                    child: Text(estado),
-                  );
-                }).toList(),
-                onChanged: widget.esAnfitrion
-                    ? (String? newValue) {
-                        if (newValue != null) {
-                          _salaProvider.estado(newValue);
-                        }
-                      }
-                    : null,
-              ),
-            ],
-          ),
-        ],
-      ),
+    return ListViewInvitados(
+      invitados: invitados,
+      esAnfitrion: esAnfitrion,
     );
   }
 }

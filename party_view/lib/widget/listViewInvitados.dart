@@ -1,3 +1,4 @@
+import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/material.dart";
 import "package:party_view/models/persona.dart";
 import "package:party_view/provider/SalaProvider.dart";
@@ -29,7 +30,9 @@ class ListViewInvitados extends StatelessWidget {
             child: Column(
               children: [
                 ListTile(
-                  leading: CircleAvatar(child: Text(invitado.nombre[0])),
+                  leading: CircleAvatar(
+                    backgroundImage: CachedNetworkImageProvider(invitado.url[0]),
+                  ),
                   title: Text("Nombre: ${invitado.nombre}"),
                   trailing:
                       esAnfitrion
