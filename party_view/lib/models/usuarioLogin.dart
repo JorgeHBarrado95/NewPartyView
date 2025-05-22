@@ -1,5 +1,5 @@
 
-class UsuarioLogin { //Es solo pa el login y registro
+class UsuarioLogin { 
   String? nombre;
   String correo;
   String contrasena;
@@ -26,7 +26,7 @@ class UsuarioLogin { //Es solo pa el login y registro
   }
 
   @override
-String toString() {
-  return 'UsuarioLogin(nombre: $nombre, correo: $correo, contrasena: $contrasena)';
-}
+  String toString() {
+    return 'UsuarioLogin(nombre: $nombre, correo: $correo, contrasena: $contrasena)';
+  }
 }

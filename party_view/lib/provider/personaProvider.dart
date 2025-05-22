@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:party_view/models/persona.dart';
 import 'package:party_view/services/loginService.dart';
 
-
-//COMO INICIALIZAR EL PROVIDER
-//final personaProvider = Provider.of<PersonaProvider>(
-//  context,
-//  listen: false,
-//);
-
-/// Proveedor de ejemplo para manejar un contador.
 class PersonaProvider with ChangeNotifier {
   Persona? _persona; 
   String _nombre = ""; 

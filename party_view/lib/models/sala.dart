@@ -54,14 +54,6 @@ class Sala {
       video: json["video"] is bool ? json["video"] : json["video"] == "true",
       estado: json["estado"] as String,
       anfitrion: Persona.fromJson(json["anfitrion"] as Map<String, dynamic>),
-      // invitados: (json["invitados"] as Map<String, dynamic>? ?? {})
-      //     .values
-      //     .map((invitado) => Persona.fromJson(invitado as Map<String, dynamic>))
-      //     .toList(),
-      // bloqueados: (json["bloqueados"] as Map<String, dynamic>? ?? {})
-      //     .values
-      //     .map((bloqueado) => Persona.fromJson(bloqueado as Map<String, dynamic>))
-      //     .toList(),
        invitados: transformarPersonas(json["invitados"]),
     bloqueados: transformarPersonas(json["bloqueados"]),
     );
@@ -69,7 +61,6 @@ class Sala {
 
   @override
   String toString() {
-    // Aquí representamos los invitados de una forma legible
     String invitadosStr =
         invitados.isEmpty
             ? "No hay invitados"

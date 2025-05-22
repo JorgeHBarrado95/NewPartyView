@@ -7,10 +7,6 @@ import 'package:party_view/models/sala.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/services/webSocketService.dart';
 
-//final salaProvider = Provider.of<SalaProvider>(
-//  context,
-//  listen: false,
-//);
 
 /// Proveedor que gestiona el estado de una sala y su sincronización con la base de datos.
 class SalaProvider with ChangeNotifier {
@@ -97,15 +93,6 @@ class SalaProvider with ChangeNotifier {
     }
     return _randIdString;
   }
-
-
-  /// Obtiene la lista de invitados de la sala desde la base de datos.
-  // Future<void> _obtenerInvitados() async {
-  //   _sala!.invitados = await _gestorSalasService.obtenerInvitados(_sala!.id);
-  //   notifyListeners();
-  // }
-
-
 
   Future<void> eliminarInvitado(Persona persona) async {
     _sala!.invitados.removeWhere((invitado) => invitado == persona);
