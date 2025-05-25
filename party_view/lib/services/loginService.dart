@@ -194,6 +194,7 @@ class Loginservice {
 
       String _nombre = _usuario["displayName"] ?? "Usuario";
       String _url = _usuario["photoUrl"] ?? "https://1drv.ms/i/c/f0a46d1dbb249072/IQRnWN3uXx_9QZE1hEEYpUWWAf-gmWac--x2INSSsA7geos?width=1024";
+      
       await personaProvider.crearPersona(_nombre, _uid, _token, _url);
       _usuarioLogin.borrarDatos();
       return 0; // Inicio de sesión exitoso.

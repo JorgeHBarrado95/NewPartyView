@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:flutter/material.dart';
 
+/// Pantalla de sala de espera donde los usuarios pueden ver información de la sala,
+/// la lista de invitados y, si son anfitriones, modificar la capacidad y el estado de la sala.
 class SalaEspera extends StatefulWidget {
   const SalaEspera({super.key});
   @override
@@ -14,6 +16,7 @@ class SalaEspera extends StatefulWidget {
 class _SalaEsperaState extends State<SalaEspera> {
   @override
   Widget build(BuildContext context) {
+    // Obtiene los providers necesarios para la sala y la persona actual.
     final personaProvider = Provider.of<PersonaProvider>(context, listen: true);
     final salaProvider = Provider.of<SalaProvider>(context, listen: true);
     final bool esAnfitrion = personaProvider.getPersona!.esAnfitrion;
@@ -22,6 +25,7 @@ class _SalaEsperaState extends State<SalaEspera> {
       backgroundColor: const Color(0xFFF5F8EE),
       body: Stack(
         children: [
+          // Fondo de la pantalla
           SizedBox.expand(
             child: Image.asset(
               'assets/fondodos.jpg',
@@ -33,6 +37,7 @@ class _SalaEsperaState extends State<SalaEspera> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const SizedBox(height: 32),
+                // Título con efecto de gradiente
                 ShaderMask(
                   shaderCallback: (Rect bounds) {
                     return const LinearGradient(
@@ -65,6 +70,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                     padding: const EdgeInsets.all(16),
                     child: LayoutBuilder(
                       builder: (context, constraints) {
+                        // Calcula el tamaño del contenedor principal de la sala
                         double maxWidth = constraints.maxWidth;
                         double maxHeight = constraints.maxHeight;
                         double containerWidth = (maxWidth * 0.95).clamp(500.0, 900.0); 
@@ -96,7 +102,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    // Información de la sala
+                                    // Información de la sala (ID, capacidad, estado)
                                     Container(
                                       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 18),
                                       decoration: BoxDecoration(
@@ -113,6 +119,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                                       child: salaProvider.sala != null
                                           ? Column(
                                               children: [
+                                                // Muestra el ID de la sala
                                                 Text(
                                                   "Sala: #${salaProvider.sala!.id}",
                                                   style: const TextStyle(
@@ -122,6 +129,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                                                   ),
                                                 ),
                                                 const SizedBox(height: 6),
+                                                // Capacidad de la sala y botones para modificarla si es anfitrión
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
@@ -162,6 +170,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                                                   ],
                                                 ),
                                                 const SizedBox(height: 6),
+                                                // Estado de la sala (Abierto/Cerrado) y dropdown para anfitrión
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
@@ -200,7 +209,7 @@ class _SalaEsperaState extends State<SalaEspera> {
                                             ),
                                     ),
                                     const SizedBox(height: 24),
-                                    // Lista de invitados
+                                    // Lista de invitados a la sala
                                     SizedBox(
                                       height: 220,
                                       child: ListaInvitados(esAnfitrion: esAnfitrion),
@@ -220,6 +229,7 @@ class _SalaEsperaState extends State<SalaEspera> {
           ),
         ],
       ),
+      // Botones flotantes: salir de la sala y, si es anfitrión, iniciar reproducción
       floatingActionButton: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
@@ -228,9 +238,12 @@ class _SalaEsperaState extends State<SalaEspera> {
             heroTag: "btn1",
             backgroundColor: Colors.white,
             onPressed: () {
+              // Acción para abandonar la sala
+              personaProvider.esAnfitrion=false;
               WebSocketServicio _webSocketServicio = WebSocketServicio();
               _webSocketServicio.abandonarSala(salaProvider.sala!.id, personaProvider.getPersona!.uid);
               Navigator.pop(context);
+
             },
             child: const Icon(Icons.arrow_back, color: Colors.deepPurple),
           ),
@@ -240,6 +253,7 @@ class _SalaEsperaState extends State<SalaEspera> {
               heroTag: "btn2",
               backgroundColor: Colors.white,
               onPressed: () {
+                // Acción para iniciar la reproducción (solo anfitrión)
                 final salaProvider = Provider.of<SalaProvider>(context, listen: false);
                 WebSocketServicio _webSocketServicio = WebSocketServicio();
                 _webSocketServicio.video(salaProvider.sala!.id);
@@ -253,6 +267,9 @@ class _SalaEsperaState extends State<SalaEspera> {
   }
 }
 
+/// Widget que muestra la lista de invitados de la sala.
+/// Si la lista está vacía, muestra un mensaje indicándolo.
+/// Si el usuario es anfitrión, puede tener opciones adicionales en la lista.
 class ListaInvitados extends StatelessWidget {
   const ListaInvitados({super.key, required this.esAnfitrion});
   final bool esAnfitrion;

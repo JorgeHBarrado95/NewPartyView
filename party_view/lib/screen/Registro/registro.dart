@@ -162,6 +162,7 @@ class RegistroScreen extends StatelessWidget {
                                         String email = campoEmail.text;
                                         String contrasena = campoContrasena.text;
                                         String confirmarContrasena = campoConfirmarContrasena.text;
+                                        
                                         _registroValidacion.registro(context, nombre, email, contrasena, confirmarContrasena);
                                       },
                                       style: ElevatedButton.styleFrom(

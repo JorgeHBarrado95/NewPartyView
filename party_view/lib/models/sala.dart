@@ -31,33 +31,54 @@ class Sala {
     };
   }
 
-  factory Sala.fromJson(String id, Map<String, dynamic> json) {
-    List<Persona> transformarPersonas(dynamic data) {
-      if (data == null) return [];
-      if (data is List) {
-        return data
-            .where((item) => item != null)
-            .map((item) => Persona.fromJson(item as Map<String, dynamic>))
-            .toList();
+factory Sala.fromJson(String id, Map<String, dynamic> json) {
+  List<Persona> transformarPersonas(dynamic data) {
+    if (data == null || data == false) return [];
+    if (data is List) {
+      return data
+          .where((item) => item != null)
+          .map((item) => Persona.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    if (data is Map) {
+      // Si es un mapa de uids a booleanos (caso de bloqueados), ignora y devuelve []
+      if (data.values.every((v) => v is bool)) {
+        return [];
       }
-      if (data is Map) {
-        return data.values
-            .where((item) => item != null)
-            .map((item) => Persona.fromJson(item as Map<String, dynamic>))
-            .toList();
-      }
+      // Si es un mapa de personas, parsea normalmente
+      return data.values
+          .where((item) => item != null)
+          .map((item) => Persona.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
     return [];
   }
-    return Sala(
-      id: id,
-      capacidad: json["capacidad"] as num,
-      video: json["video"] is bool ? json["video"] : json["video"] == "true",
-      estado: json["estado"] as String,
-      anfitrion: Persona.fromJson(json["anfitrion"] as Map<String, dynamic>),
-       invitados: transformarPersonas(json["invitados"]),
-    bloqueados: transformarPersonas(json["bloqueados"]),
-    );
-  }
+
+  // Valores por defecto si faltan campos
+  final capacidad = json["capacidad"] ?? 0;
+  final video = json["video"] is bool ? json["video"] : json["video"] == "true";
+  final estado = json["estado"] ?? "Desconocido";
+  final anfitrion = json["anfitrion"] != null
+      ? Persona.fromJson(json["anfitrion"] as Map<String, dynamic>)
+      : Persona(
+          nombre: "Sin anfitrión",
+          esAnfitrion: true,
+          uid: "",
+          url: "",
+        );
+  final invitados = transformarPersonas(json["invitados"]);
+  final bloqueados = transformarPersonas(json["bloqueados"]);
+
+  return Sala(
+    id: id,
+    capacidad: capacidad,
+    video: video,
+    estado: estado,
+    anfitrion: anfitrion,
+    invitados: invitados,
+    bloqueados: bloqueados,
+  );
+}
 
   @override
   String toString() {

@@ -16,7 +16,7 @@ class _cambiarNombreState extends State<cambiarNombre> {
   void initState() {
     super.initState();
     final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
-    _controller = TextEditingController(text: personaProvider.getNombre);
+    _controller = TextEditingController(text: personaProvider.getPersona!.nombre);
   }
 
   @override
@@ -46,7 +46,7 @@ class _cambiarNombreState extends State<cambiarNombre> {
             controller: _controller,
             style: const TextStyle(color: Colors.white),
             decoration: InputDecoration(
-              hintText: personaProvider.getNombre,
+              hintText: personaProvider.getPersona!.nombre,
               hintStyle: const TextStyle(color: Colors.white70),
               filled: true,
               fillColor: Colors.deepPurple.withOpacity(0.3),

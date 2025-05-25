@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:party_view/models/sala.dart';
+import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/listViewSala.dart';
+
 import 'package:provider/provider.dart';
-import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:party_view/services/webSocketService.dart';
 
@@ -30,9 +31,9 @@ class _PrincipalState extends State<Principal> {
     });
   }
 
-  void _filtrarSalas(String value, List<Sala> todasLasSalas) {
+  void _filtrarSalas(String idABuscar, List<Sala> todasLasSalas) {
     setState(() {
-      _busqueda = value.replaceAll('#', '');
+      _busqueda = idABuscar.replaceAll('#', '');
       if (_busqueda.isEmpty) {
         _salasFiltradas = todasLasSalas;
       } else {
@@ -121,7 +122,7 @@ class _PrincipalState extends State<Principal> {
                                   child: Row(
                                     children: [
                                       Expanded(
-                                        child: TextField(
+                                        child: TextField( //BUSCADOR
                                           controller: _buscadorController,
                                           onChanged: (value) async {
                                             final todasLasSalas = await _futureSalas;
@@ -204,6 +205,7 @@ class _PrincipalState extends State<Principal> {
                                               ),
                                             );
                                           }
+                                          //Retorna el widget ListViewSala con las salas filtradas
                                           return ListViewSala(salas: salasAMostrar);
                                         }
                                       },
@@ -250,8 +252,6 @@ class _PrincipalState extends State<Principal> {
               );
               personaProvider.esAnfitrion = true;
               await salaProvider.crearSala(personaProvider.getPersona!);
-              final gestorSalasService = GestorSalasService();
-              await gestorSalasService.actualizarSala(salaProvider.sala!);
               final _socket = WebSocketServicio();
               _socket.conexion(context);
               _socket.crearSala(salaProvider.sala!);

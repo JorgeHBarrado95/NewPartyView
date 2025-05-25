@@ -69,14 +69,14 @@ class GestorSalasService {
   ///
   /// [sala] La sala que se desea actualizar.
   /// Actualmente, este método elimina la sala en lugar de actualizarla.
-  Future<void> actualizarSala(Sala sala) async {
-    final _url = Uri.parse("${this.url}/${sala.id}.json");
-    final response = await http.patch(
-      _url,
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode(sala.toJson()),
-    );
-  }
+  // Future<void> actualizarSala(Sala sala) async {
+  //   final _url = Uri.parse("${this.url}/${sala.id}.json");
+  //   final response = await http.patch(
+  //     _url,
+  //     headers: {"Content-Type": "application/json"},
+  //     body: jsonEncode(sala.toJson()),
+  //   );
+  // }
 
   /// Obtiene la lista de invitados de una sala específica, esto solo se usa para el anfitrion,
   /// porq solo se necesita actualizar la lista de invitados.

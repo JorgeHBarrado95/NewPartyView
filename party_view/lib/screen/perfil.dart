@@ -160,9 +160,9 @@ class PerfilScreen extends StatelessWidget {
                                         child: Column(
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            fotoPerfil(),
+                                            fotoPerfil(), //FOTO DE PERFIL
                                             const SizedBox(height: 16),
-                                            cambiarNombre(),
+                                            cambiarNombre(), //CAMBIAR NOMBRE
                                           ],
                                         ),
                                       ),

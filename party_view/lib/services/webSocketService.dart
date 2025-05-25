@@ -129,10 +129,11 @@ class WebSocketServicio {
 
     final sala = _salaProvider.sala;
     final personaProvider = Provider.of<PersonaProvider>(context, listen: false);
+    
     if (sala != null && personaProvider.esAnfitrion && _localStream != null) {
       final anfitrionUid = sala.anfitrion.uid;
       final nuevoInvitadoUid = contenido['uid'];
-      await _createOfferForInvitado(sala.id, anfitrionUid, nuevoInvitadoUid);
+      await _crearOfertaInvitado(sala.id, anfitrionUid, nuevoInvitadoUid);
       print('Oferta enviada al nuevo invitado: ' + nuevoInvitadoUid);
     }
   }
@@ -307,124 +308,6 @@ class WebSocketServicio {
     });
   }
 
-  Future<void> startBroadcast(String salaId, String anfitrionUid, List<String> invitadosUids, MediaStream stream) async {
-    _localStream = stream;
-    for (final uid in invitadosUids) {
-      await _createOfferForInvitado(salaId, anfitrionUid, uid);
-    }
-  }
-
-  Future<void> _createOfferForInvitado(String salaId, String from, String to) async {
-    final pc = await createPeerConnection({
-      'iceServers': [
-        {'urls': 'stun:stun.l.google.com:19302'}
-      ]
-    });
-    _peerConnections[to] = pc;
-    if (_localStream != null) {
-      // Usar addTrack en vez de addStream para Unified Plan
-      for (var track in _localStream!.getTracks()) {
-        print('[ANFITRION] Añadiendo track al peer $to: id=${track.id}, kind=${track.kind}, enabled=${track.enabled}, muted=${track.muted}');
-        await pc.addTrack(track, _localStream!);
-      }
-    } else {
-      print('[ANFITRION][ERROR] _localStream es null al crear la oferta para $to');
-    }
-    if (pc.connectionState == 'closed') {
-      print('[ANFITRION][ERROR] peerConnection $to está cerrado antes de crear la oferta');
-    }
-    pc.onIceCandidate = (candidate) {
-      sendSignal(roomId: salaId, from: from, to: to, signalData: {'candidate': candidate.toMap()});
-    };
-    pc.onIceConnectionState = (state) {
-      print('ICE state for $to: $state');
-    };
-    final offer = await pc.createOffer({
-      'offerToReceiveVideo': 1,
-      'offerToReceiveAudio': 1,
-      'voiceActivityDetection': false,
-      'mandatory': {},
-      'optional': [],
-    });
-    // Fuerza VP8 en el SDP
-    String sdpVp8 = _preferVP8(offer.sdp!);
-    await pc.setLocalDescription(RTCSessionDescription(sdpVp8, offer.type));
-    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': sdpVp8, 'type': offer.type});
-  }
-
-  /// Fuerza VP8 como único codec de video en el SDP
-  String _preferVP8(String sdp) {
-    final lines = sdp.split('\n');
-    final mLineIndex = lines.indexWhere((l) => l.startsWith('m=video'));
-    if (mLineIndex == -1) return sdp;
-    // Encuentra los payload types de VP8
-    final vp8RtpMap = RegExp(r'^a=rtpmap:(\d+) VP8/90000', multiLine: true);
-    final matches = vp8RtpMap.allMatches(sdp);
-    if (matches.isEmpty) return sdp;
-    final vp8Payloads = matches.map((m) => m.group(1)).toList();
-    if (vp8Payloads.isEmpty) return sdp;
-    // Reemplaza la línea m=video para solo incluir VP8
-    final mLine = lines[mLineIndex].split(' ');
-    final newMLine = mLine.sublist(0,3) + vp8Payloads.whereType<String>().toList();
-    lines[mLineIndex] = newMLine.join(' ');
-    // Elimina todos los a=rtpmap excepto VP8 y sus fmtp/fb
-    final allowed = vp8Payloads.toSet();
-    final filtered = <String>[];
-    for (var l in lines) {
-      if (l.startsWith('a=rtpmap:')) {
-        final pt = l.split(':')[1].split(' ')[0];
-        if (allowed.contains(pt)) filtered.add(l);
-      } else if (l.startsWith('a=fmtp:') || l.startsWith('a=rtcp-fb:')) {
-        final pt = l.split(':')[1].split(' ')[0];
-        if (allowed.contains(pt)) filtered.add(l);
-      } else if (!l.startsWith('a=rtpmap:') && !l.startsWith('a=fmtp:') && !l.startsWith('a=rtcp-fb:')) {
-        filtered.add(l);
-      }
-    }
-    return filtered.join('\n');
-  }
-
-  Future<void> handleOffer(String salaId, String from, String to, Map offer) async {
-    print('[INVITADO] Recibida oferta de $from para $to en sala $salaId');
-    final pc = await createPeerConnection({
-      'iceServers': [
-        {'urls': 'stun:stun.l.google.com:19302'}
-      ]
-    });
-    _peerConnections[from] = pc;
-    // Usar onTrack para Unified Plan
-    pc.onTrack = (RTCTrackEvent event) {
-      print('[INVITADO] onTrack recibido, streams: ${event.streams.length}');
-      if (event.streams.isNotEmpty && onRemoteStream != null) {
-        print('[INVITADO] Llamando a onRemoteStream con el stream remoto');
-        onRemoteStream!(event.streams[0]);
-      }
-    };
-    pc.onIceCandidate = (candidate) {
-      print('[INVITADO] Enviando ICE candidate al anfitrión');
-      sendSignal(roomId: salaId, from: to, to: from, signalData: {'candidate': candidate.toMap()});
-    };
-    await pc.setRemoteDescription(RTCSessionDescription(offer['sdp'], offer['type']));
-    final answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    print('[INVITADO] Enviando answer al anfitrión');
-    sendSignal(roomId: salaId, from: to, to: from, signalData: {'sdp': answer.sdp, 'type': answer.type});
-  }
-
-  Future<void> handleAnswer(String from, Map answer) async {
-    final pc = _peerConnections[from];
-    if (pc != null) {
-      await pc.setRemoteDescription(RTCSessionDescription(answer['sdp'], answer['type']));
-    }
-  }
-
-  Future<void> handleCandidate(String from, Map candidate) async {
-    final pc = _peerConnections[from];
-    if (pc != null) {
-      await pc.addCandidate(RTCIceCandidate(candidate['candidate'], candidate['sdpMid'], candidate['sdpMLineIndex']));
-    }
-  }
-
   void _mandarMensaje(String type, Map<String, dynamic> payload) {
     if (_channel == null) {
       print("⚠️ No conectado o sin token");
@@ -444,8 +327,6 @@ class WebSocketServicio {
   }
 
   void incrementarCapacidad(String salaId) {
-    print("object");
-
     _mandarMensaje("subir-capacidad", {
       "salaId": salaId,
     });
@@ -507,5 +388,99 @@ class WebSocketServicio {
       print('Error limpiando localStream: ' + e.toString());
     }
     _localStream = null;
+  }
+
+
+  Future<void> empezarTransmision(String salaId, String anfitrionUid, List<String> invitadosUids, MediaStream stream) async {
+    _localStream = stream;
+    for (final uid in invitadosUids) {
+      await _crearOfertaInvitado(salaId, anfitrionUid, uid);
+    }
+  }
+
+  /// Esto permite que el anfitrión comparta su stream con cada invitado de la sala.
+  Future<void> _crearOfertaInvitado(String salaId, String from, String to) async {
+     // 1. Crea una nueva PeerConnection con un servidor STUN público.
+    final pc = await createPeerConnection({
+      'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'}
+      ]
+    });
+
+      // 2. Guarda la PeerConnection en el mapa usando el UID del invitado.
+    _peerConnections[to] = pc;
+
+    // 3. Si hay un stream local (pantalla/cámara del anfitrión), añade todos sus tracks a la conexión.
+    if (_localStream != null) {
+      // Usar addTrack en vez de addStream para Unified Plan
+      for (var track in _localStream!.getTracks()) {
+        print('[ANFITRION] Añadiendo track al peer $to: id=${track.id}, kind=${track.kind}, enabled=${track.enabled}, muted=${track.muted}');
+        await pc.addTrack(track, _localStream!);
+      }
+    } else {
+      print('[ANFITRION][ERROR] _localStream es null al crear la oferta para $to');
+    }
+      // 4. Comprueba si la conexión está cerrada antes de continuar.
+
+    if (pc.connectionState == 'closed') {
+      print('[ANFITRION][ERROR] peerConnection $to está cerrado antes de crear la oferta');
+    }
+    pc.onIceCandidate = (candidate) {
+      sendSignal(roomId: salaId, from: from, to: to, signalData: {'candidate': candidate.toMap()});
+    };
+    pc.onIceConnectionState = (state) {
+      print('ICE state for $to: $state');
+    };
+    final offer = await pc.createOffer({
+      'offerToReceiveVideo': 1,
+      'offerToReceiveAudio': 1,
+      'voiceActivityDetection': false,
+      'mandatory': {},
+      'optional': [],
+    });
+
+    await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, offer.type));
+    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': offer.sdp, 'type': offer.type});
+  }
+
+  Future<void> handleOffer(String salaId, String from, String to, Map offer) async {
+    print('[INVITADO] Recibida oferta de $from para $to en sala $salaId');
+    final pc = await createPeerConnection({
+      'iceServers': [
+        {'urls': 'stun:stun.l.google.com:19302'}
+      ]
+    });
+    _peerConnections[from] = pc;
+    // Usar onTrack para Unified Plan
+    pc.onTrack = (RTCTrackEvent event) {
+      print('[INVITADO] onTrack recibido, streams: ${event.streams.length}');
+      if (event.streams.isNotEmpty && onRemoteStream != null) {
+        print('[INVITADO] Llamando a onRemoteStream con el stream remoto');
+        onRemoteStream!(event.streams[0]);
+      }
+    };
+    pc.onIceCandidate = (candidate) {
+      print('[INVITADO] Enviando ICE candidate al anfitrión');
+      sendSignal(roomId: salaId, from: to, to: from, signalData: {'candidate': candidate.toMap()});
+    };
+    await pc.setRemoteDescription(RTCSessionDescription(offer['sdp'], offer['type']));
+    final answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    print('[INVITADO] Enviando answer al anfitrión');
+    sendSignal(roomId: salaId, from: to, to: from, signalData: {'sdp': answer.sdp, 'type': answer.type});
+  }
+
+  Future<void> handleAnswer(String from, Map answer) async {
+    final pc = _peerConnections[from];
+    if (pc != null) {
+      await pc.setRemoteDescription(RTCSessionDescription(answer['sdp'], answer['type']));
+    }
+  }
+
+  Future<void> handleCandidate(String from, Map candidate) async {
+    final pc = _peerConnections[from];
+    if (pc != null) {
+      await pc.addCandidate(RTCIceCandidate(candidate['candidate'], candidate['sdpMid'], candidate['sdpMLineIndex']));
+    }
   }
 }

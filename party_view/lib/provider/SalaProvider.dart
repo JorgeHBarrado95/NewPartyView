@@ -80,15 +80,15 @@ class SalaProvider with ChangeNotifier {
     bool _idMal = true;
     String _randIdString = "";
     while (_idMal) {
-      int _randId = random.nextInt(100000);
+      int _randId = random.nextInt(100000); //0-99999 (5 caracteres)
       _randIdString = _randId.toString().padLeft(
         5,
         "0",
-      ); // Asegura que el ID tenga 5 dígitos.
+      ); // Asegura que el ID tenga 5 dígitos
 
       if (await _gestorSalasService.comprobarSiExiste(_randIdString) !=
           "null") {
-        _idMal = false; // Si el ID no existe, sale del bucle.
+        _idMal = false; // Si el ID no existe, sale del bucle
       }
     }
     return _randIdString;
@@ -96,7 +96,7 @@ class SalaProvider with ChangeNotifier {
 
   Future<void> eliminarInvitado(Persona persona) async {
     _sala!.invitados.removeWhere((invitado) => invitado == persona);
-    await _gestorSalasService.actualizarSala(_sala!);
+    //await _gestorSalasService.actualizarSala(_sala!);
     Future.microtask(
       () => notifyListeners(),
     ); // se asegura que se ejecute después

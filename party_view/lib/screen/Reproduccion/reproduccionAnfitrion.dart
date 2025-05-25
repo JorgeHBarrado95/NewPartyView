@@ -9,16 +9,25 @@ import 'package:party_view/services/webSocketService.dart';
 import 'package:party_view/provider/SalaProvider.dart';
 import 'package:provider/provider.dart';
 
+/// Pantalla para la reproducción del anfitrión.
+/// Permite compartir la pantalla y transmitirla a los invitados usando WebRTC.
 class ReproduccionAnfitrion extends StatefulWidget {
   @override
   _ReproduccionAnfitrion createState() => _ReproduccionAnfitrion();
 }
 
 class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
-  MediaStream? _localStream; ///[_localStream] es el flujo de datos captados al compartir la pantalla
-  final RTCVideoRenderer _localRenderer = RTCVideoRenderer(); ///[_localRenderer] es el renderizador de video que se utiliza para mostrar el flujo de datos en la pantalla
-  bool _enLlamada = false; ///[_enLlamada] es un booleano que indica si se está en una llamada o no
-  DesktopCapturerSource? fuenteSeleccionada;  ///[fuenteSeleccionada] es la fuente de la pantalla seleccionada
+  /// [_localStream] es el flujo de datos captados al compartir la pantalla.
+  MediaStream? _localStream;
+
+  /// [_localRenderer] es el renderizador de video que se utiliza para mostrar el flujo de datos en la pantalla.
+  final RTCVideoRenderer _localRenderer = RTCVideoRenderer();
+
+  /// [_enLlamada] indica si se está compartiendo pantalla actualmente.
+  bool _enLlamada = false;
+
+  /// [fuenteSeleccionada] es la fuente de la pantalla seleccionada (solo en escritorio).
+  DesktopCapturerSource? fuenteSeleccionada;
 
   @override
   void initState() {
@@ -26,8 +35,10 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
     iniciarRender();
   }
 
+  /// Se llama cuando el widget se elimina del árbol de widgets.
+  /// Libera recursos y detiene la transmisión si está activa.
   @override
-  void deactivate() { ///[deactivate] es un método que se llama cuando el widget se elimina del árbol de widgets
+  void deactivate() {
     super.deactivate();
     if (_enLlamada) {
       _stop();
@@ -35,12 +46,14 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
     _localRenderer.dispose();
   }
 
+  /// Inicializa el renderizador de video local.
   Future<void> iniciarRender() async {
     await _localRenderer.initialize();
     print('[ANFITRION] Renderer inicializado');
   }
 
-  /// [seleccionarFuentePantalla] Esta funcion se encarga de seleccionar la fuente de la pantalla
+  /// Permite seleccionar la fuente de pantalla a compartir.
+  /// En escritorio muestra un diálogo, en Android solicita permisos y comienza la transmisión.
   Future<void> seleccionarFuentePantalla(BuildContext context) async {
     if (WebRTC.platformIsDesktop) {
       // Linux y Windows
@@ -106,49 +119,56 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
     });
 
     try {
-      // Espera solo en Android para evitar crash por race condition con permisos o FlutterBackground
+      // Esperar a q se inicien los permisos de segundo plano en Android
       if (WebRTC.platformIsAndroid) {
         await Future.delayed(Duration(milliseconds: 300));
       }
 
+      //Se pide acceso a la captura de pantalla
       var stream = await navigator.mediaDevices.getDisplayMedia(<String, dynamic>{
-        'video': fuenteSeleccionada == null
-            ? true
+        'video': fuenteSeleccionada == null //Si es null, es Android
+            ? true //Si es true, es desktop, por lo tando se elige la ventana q el usuario seleccionó
             : {
                 'deviceId': {'exact': fuenteSeleccionada!.id},
                 'mandatory': {'frameRate': 30.0}
               }
       });
 
+      //COMPROBACIONES DE VIDEO TRACKS
       print('[ANFITRION] Captura iniciada. Video tracks: ${stream.getVideoTracks().length}');
       if (stream.getVideoTracks().isNotEmpty) {
         final t = stream.getVideoTracks()[0];
         print('[ANFITRION] video track id: ${t.id}, enabled: ${t.enabled}, muted: ${t.muted}');
       }
 
+      //Cuando el usuario cierra la ventana
       stream.getVideoTracks()[0].onEnded = () {
         print('Captura de pantalla finalizada por el usuario.');
         _colgar();
       };
-
+      
+      //Guardamos el stream local capturado
       _localStream = stream;
+
       // Espera a que el renderer esté inicializado
       if (_localRenderer.textureId != null) {
         print('[ANFITRION] Renderer local ya inicializado');
       }
       await iniciarRender();
+
+      // Asignamos el stream local al renderer local para ir viendo lo q se muestra
       _localRenderer.srcObject = _localStream;
       print('[ANFITRION] Renderer local asignado.');
 
-      // --- INTEGRACIÓN WEBRTC BROADCAST ---
+      //Avisamos al WebSocket que se ha iniciado la captura de pantalla
       final salaProvider = Provider.of<SalaProvider>(context, listen: false);
       final sala = salaProvider.sala;
       if (sala != null) {
         final anfitrionUid = sala.anfitrion.uid;
         final invitadosUids = sala.invitados.map((inv) => inv.uid).toList();
-        await WebSocketServicio().startBroadcast(sala.id, anfitrionUid, invitadosUids, _localStream!);
+        await WebSocketServicio().empezarTransmision(sala.id, anfitrionUid, invitadosUids, _localStream!);
       }
-      // --- FIN INTEGRACIÓN ---
+
     } catch (e) {
       print('Error al iniciar captura de pantalla: $e');
 
@@ -184,9 +204,9 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
       await _localStream?.dispose();
       _localStream = null;
       _localRenderer.srcObject = null;
-      // --- LIMPIEZA WEBRTC ---
+      // Limpiamos el renderer local
       await WebSocketServicio().closeAllPeerConnections();
-      // --- FIN LIMPIEZA ---
+
     } catch (e) {
       print(e.toString());
     }
