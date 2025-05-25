@@ -62,7 +62,7 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
         builder: (context) => SeleccionarPantalla(),
       );
       if (source != null) {
-        await _hacerLlamada(source);
+        await _hacerLlamada(source); // Inicia la llamada con la fuente seleccionada
       }
     } else {
       if (WebRTC.platformIsAndroid) {
@@ -244,7 +244,7 @@ class _ReproduccionAnfitrion extends State<ReproduccionAnfitrion> {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          //Si el boolean _inCalling es true, se ejecuta la función _hangUp(), si no, se ejecuta la función selectScreenSourceDialog(context)
+          //Si el boolean _enLlamada es true, se ejecuta la función _colgar(), si no, se ejecuta la función seleccionarFuentePantalla(context)
           _enLlamada ? _colgar() : seleccionarFuentePantalla(context);
         },
         tooltip: _enLlamada ? 'Hangup' : 'Call',

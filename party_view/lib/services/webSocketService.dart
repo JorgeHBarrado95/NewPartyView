@@ -81,9 +81,9 @@ class WebSocketServicio {
             final salaProvider = Provider.of<SalaProvider>(context, listen: false);
             final salaId = salaProvider.sala?.id;
             if (signalData['type'] == 'offer') {
-              await handleOffer(salaId!, from, to, signalData);
+              await handleOferta(salaId!, from, to, signalData);
             } else if (signalData['type'] == 'answer') {
-              await handleAnswer(from, signalData);
+              await handleRespuesta(from, signalData);
             } else if (signalData['candidate'] != null) {
               await handleCandidate(from, signalData['candidate']);
             }
@@ -284,7 +284,7 @@ class WebSocketServicio {
     });
   }
 
-  void sendSignal({
+  void mandarSenal({
     required String roomId,
     required String from,
     required String to,
@@ -421,16 +421,10 @@ class WebSocketServicio {
       print('[ANFITRION][ERROR] _localStream es null al crear la oferta para $to');
     }
       // 4. Comprueba si la conexión está cerrada antes de continuar.
-
     if (pc.connectionState == 'closed') {
       print('[ANFITRION][ERROR] peerConnection $to está cerrado antes de crear la oferta');
     }
-    pc.onIceCandidate = (candidate) {
-      sendSignal(roomId: salaId, from: from, to: to, signalData: {'candidate': candidate.toMap()});
-    };
-    pc.onIceConnectionState = (state) {
-      print('ICE state for $to: $state');
-    };
+    // 5. Crea la oferta SDP para iniciar la conexión.
     final offer = await pc.createOffer({
       'offerToReceiveVideo': 1,
       'offerToReceiveAudio': 1,
@@ -438,20 +432,25 @@ class WebSocketServicio {
       'mandatory': {},
       'optional': [],
     });
-
+    // 6. Establece la descripción local con la oferta creada.
     await pc.setLocalDescription(RTCSessionDescription(offer.sdp!, offer.type));
-    sendSignal(roomId: salaId, from: from, to: to, signalData: {'sdp': offer.sdp, 'type': offer.type});
+    // 7. Envía la oferta SDP al invitado usando señalización WebSocket.
+    mandarSenal(roomId: salaId, from: from, to: to, signalData: {'sdp': offer.sdp, 'type': offer.type});
   }
 
-  Future<void> handleOffer(String salaId, String from, String to, Map offer) async {
+  /// Establece la conexión WebRTC con el anfitrión y responde con una answer SDP.
+  Future<void> handleOferta(String salaId, String from, String to, Map offer) async {
     print('[INVITADO] Recibida oferta de $from para $to en sala $salaId');
+
+      //Crea una nueva PeerConnection con un servidor STUN público.
     final pc = await createPeerConnection({
       'iceServers': [
         {'urls': 'stun:stun.l.google.com:19302'}
       ]
     });
+      //Guarda la PeerConnection en el mapa usando el UID del anfitrión.
     _peerConnections[from] = pc;
-    // Usar onTrack para Unified Plan
+    // Configura para recibir el stream remoto. (Tracks)
     pc.onTrack = (RTCTrackEvent event) {
       print('[INVITADO] onTrack recibido, streams: ${event.streams.length}');
       if (event.streams.isNotEmpty && onRemoteStream != null) {
@@ -459,18 +458,20 @@ class WebSocketServicio {
         onRemoteStream!(event.streams[0]);
       }
     };
-    pc.onIceCandidate = (candidate) {
-      print('[INVITADO] Enviando ICE candidate al anfitrión');
-      sendSignal(roomId: salaId, from: to, to: from, signalData: {'candidate': candidate.toMap()});
-    };
+
+    // Establece la descripción remota con la oferta recibida del anfitrión.
     await pc.setRemoteDescription(RTCSessionDescription(offer['sdp'], offer['type']));
+      
+    //Crea una respuesta SDP (answer) ç
     final answer = await pc.createAnswer();
+    //Establece la descripción local con la answer creada.
     await pc.setLocalDescription(answer);
     print('[INVITADO] Enviando answer al anfitrión');
-    sendSignal(roomId: salaId, from: to, to: from, signalData: {'sdp': answer.sdp, 'type': answer.type});
+     //Envía la answer SDP al anfitrión usando señalización WebSocket.
+    mandarSenal(roomId: salaId, from: to, to: from, signalData: {'sdp': answer.sdp, 'type': answer.type});
   }
 
-  Future<void> handleAnswer(String from, Map answer) async {
+  Future<void> handleRespuesta(String from, Map answer) async {
     final pc = _peerConnections[from];
     if (pc != null) {
       await pc.setRemoteDescription(RTCSessionDescription(answer['sdp'], answer['type']));
