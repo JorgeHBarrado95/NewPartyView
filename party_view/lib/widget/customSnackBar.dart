@@ -3,6 +3,7 @@ import 'package:awesome_snackbar_content/awesome_snackbar_content.dart';
 import 'package:flutter/material.dart';
 
 class CustomSnackbar {
+  //SON LOS SNACKBAR QUE SE USAN EN TODA LA APLICACION
   static SnackBar aprobacion(String title, String message) {
     return SnackBar(
       elevation: 0,

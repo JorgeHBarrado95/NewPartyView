@@ -2,7 +2,7 @@ import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/webSocketService.dart';
 import 'package:party_view/widget/listViewInvitados.dart';
 import 'package:provider/provider.dart';
-import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/salaProvider.dart';
 import 'package:flutter/material.dart';
 
 /// Pantalla de sala de espera donde los usuarios pueden ver información de la sala,

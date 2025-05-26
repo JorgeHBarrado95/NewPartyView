@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 import "package:party_view/models/sala.dart";
-import "package:party_view/provider/SalaProvider.dart";
+import "package:party_view/provider/salaProvider.dart";
 import "package:party_view/provider/personaProvider.dart";
 import "package:party_view/services/webSocketService.dart";
 import "package:provider/provider.dart";

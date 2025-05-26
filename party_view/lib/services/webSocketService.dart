@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:party_view/models/sala.dart';
-import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/salaProvider.dart';
 import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/customSnackBar.dart';
@@ -264,6 +264,8 @@ class WebSocketServicio {
     Provider.of<SalaProvider>(context, listen: false).clearSala();
   }
 
+  /// Envía una solicitud para crear una nueva sala al backend.
+  /// [sala] La sala a crear.
   void crearSala(Sala sala) {
     _mandarMensaje("crear-sala", {
       "id": sala.id,
@@ -274,6 +276,9 @@ class WebSocketServicio {
     });
   }
 
+  /// Envía una solicitud para unirse a una sala existente.
+  /// [id] ID de la sala a la que se quiere unir.
+  /// [persona] Información del usuario que se une.
   void unirseSala({
     required String id,
     required Map<String, dynamic> persona,
@@ -284,6 +289,11 @@ class WebSocketServicio {
     });
   }
 
+  /// Envía una señal WebRTC (oferta, respuesta o candidato ICE) a otro usuario.
+  /// [roomId] ID de la sala.
+  /// [from] UID del emisor.
+  /// [to] UID del receptor.
+  /// [signalData] Datos de la señalización (SDP o ICE).
   void mandarSenal({
     required String roomId,
     required String from,
@@ -298,6 +308,9 @@ class WebSocketServicio {
     });
   }
 
+  /// Envía una solicitud para abandonar la sala.
+  /// [roomId] ID de la sala.
+  /// [uid] UID del usuario que abandona.
   void salirSala({
     required String roomId,
     required String uid,

@@ -1,7 +1,7 @@
 import "package:cached_network_image/cached_network_image.dart";
 import "package:flutter/material.dart";
 import "package:party_view/models/persona.dart";
-import "package:party_view/provider/SalaProvider.dart";
+import "package:party_view/provider/salaProvider.dart";
 import "package:party_view/widget/customSnackBar.dart";
 import "package:provider/provider.dart";
 

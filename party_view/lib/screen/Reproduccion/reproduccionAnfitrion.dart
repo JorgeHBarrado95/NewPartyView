@@ -6,7 +6,7 @@ import 'package:flutter_background/flutter_background.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:party_view/widget/seleccionarPantalla.dart';
 import 'package:party_view/services/webSocketService.dart';
-import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/salaProvider.dart';
 import 'package:provider/provider.dart';
 
 /// Pantalla para la reproducción del anfitrión.

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/salaProvider.dart';
 import 'package:party_view/provider/personaProvider.dart';
 import 'package:party_view/screen/Registro/verificarCorreo.dart';
 import 'package:party_view/screen/Reproduccion/reproduccionAnfitrion.dart';

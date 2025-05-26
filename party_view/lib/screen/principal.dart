@@ -5,7 +5,7 @@ import 'package:party_view/services/gestorSalasService.dart';
 import 'package:party_view/widget/listViewSala.dart';
 
 import 'package:provider/provider.dart';
-import 'package:party_view/provider/SalaProvider.dart';
+import 'package:party_view/provider/salaProvider.dart';
 import 'package:party_view/services/webSocketService.dart';
 
 class Principal extends StatefulWidget {

@@ -94,26 +94,31 @@ class SalaProvider with ChangeNotifier {
     return _randIdString;
   }
 
+  /// Elimina un invitado de la sala y notifica a los listeners.
+  /// También informa al backend mediante WebSocket.
   Future<void> eliminarInvitado(Persona persona) async {
     _sala!.invitados.removeWhere((invitado) => invitado == persona);
-    //await _gestorSalasService.actualizarSala(_sala!);
+    // Notifica a los listeners después de la operación.
     Future.microtask(
       () => notifyListeners(),
     ); // se asegura que se ejecute después
 
+    // Expulsa al invitado en el backend vía WebSocket.
     WebSocketServicio _webSocketServicio = WebSocketServicio();
     _webSocketServicio.expulsarInvitado(_sala!.id, persona.uid);
   }
 
+  /// Bloquea una persona, la elimina de la sala y notifica al backend.
   Future<void> bloquearPersona(Persona persona) async {
     _sala!.bloqueados.add(persona);
     eliminarInvitado(persona);
 
+    // Informa al backend que la persona ha sido bloqueada.
     WebSocketServicio _webSocketServicio = WebSocketServicio();
     _webSocketServicio.bloquearInvitado(_sala!.id, persona.uid);
   }
 
-  //Actualizamos invitados cuando se notifica desde el socket
+  /// Actualiza la lista de invitados desde el backend y notifica a los listeners.
   Future<void> actualizarInvitados() async {
     GestorSalasService _gestorSalasService = GestorSalasService();
 
@@ -122,6 +127,7 @@ class SalaProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Actualiza toda la información de la sala desde el backend.
   Future<void> actualizarSala() async {
     if (sala == null) return;
     final nuevaSala = await GestorSalasService().obtenerSala(sala!.id);

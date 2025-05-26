@@ -87,17 +87,6 @@ class Loginservice {
         await Future.delayed(Duration(seconds: 2));
       }
 
-      // //Actualiza el displayName
-      // final _respuesta2 = await http.post(
-      //   urlUpdate,
-      //   headers: {"Content-Type": "application/json"},
-      //   body: jsonEncode({
-      //     "idToken": _token,
-      //     "displayName": _usuarioLogin.nombre,
-      //     "returnSecureToken": true,
-      //   }),
-      // );
-
       //Actualiza el displayName
       cambiarNombre(_usuarioLogin.nombre!, _token, false);
       
